@@ -150,7 +150,7 @@ const Index = () => {
                 <Utensils className="w-6 h-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">라멘맵</h1>
+                <h1 className="text-2xl font-bold text-foreground">라멘로그</h1>
                 <p className="text-sm text-muted-foreground">한국 최고의 라멘집을 찾아보세요</p>
               </div>
             </div>
@@ -268,7 +268,7 @@ const Index = () => {
       <footer className="bg-card border-t mt-16">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-muted-foreground">
-            <p>© 2024 라멘맵. 맛있는 라멘을 위한 여정</p>
+            <p>© 2024 라멘로그. 맛있는 라멘을 위한 여정</p>
           </div>
         </div>
       </footer>
