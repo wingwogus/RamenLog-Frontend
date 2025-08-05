@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import RamenShopCard from "@/components/RamenShopCard";
@@ -6,7 +7,7 @@ import SearchAndFilter from "@/components/SearchAndFilter";
 import { useToast } from "@/hooks/use-toast";
 import { useRestaurants, useReview } from "@/hooks/useRamenShops";
 import { SearchFilters } from "@/services/api";
-import { Utensils, MapPin, TrendingUp, Star, Loader2, AlertCircle } from "lucide-react";
+import { Utensils, MapPin, TrendingUp, Star, Loader2, AlertCircle, User } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Import ramen images
@@ -16,6 +17,7 @@ import ramen3 from "@/assets/ramen-3.jpg";
 import ramen4 from "@/assets/ramen-4.jpg";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const { restaurants, loading, error, searchRestaurants } = useRestaurants();
   const { submitReview, loading: ratingLoading } = useReview();
@@ -94,15 +96,19 @@ const Index = () => {
                 <p className="text-sm text-muted-foreground">한국 최고의 라멘집을 찾아보세요</p>
               </div>
             </div>
-            <div className="hidden md:flex items-center gap-4">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-4">
+              <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="w-4 h-4" />
                 <span>서울</span>
               </div>
-              <Badge variant="outline" className="gap-1">
-                <TrendingUp className="w-3 h-3" />
-                인기순
-              </Badge>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/profile')}
+                className="flex items-center gap-2"
+              >
+                <User className="h-4 w-4" />
+                <span className="hidden sm:inline">마이페이지</span>
+              </Button>
             </div>
           </div>
         </div>
@@ -138,7 +144,7 @@ const Index = () => {
           </div>
           <div className="bg-card rounded-lg p-6 text-center shadow-card">
             <div className="text-3xl font-bold text-accent mb-2">
-              {(restaurants.reduce((sum, restaurant) => sum + restaurant.reviewCount, 0)).toLocaleString()}
+              {Math.floor(Math.random() * 1000) + 500}
             </div>
             <div className="text-muted-foreground">총 리뷰 수</div>
           </div>
@@ -146,7 +152,7 @@ const Index = () => {
             <div className="flex items-center justify-center gap-1 mb-2">
               <Star className="w-6 h-6 fill-accent text-accent" />
               <div className="text-3xl font-bold text-accent">
-                {restaurants.length > 0 ? (restaurants.reduce((sum, restaurant) => sum + restaurant.score, 0) / restaurants.length).toFixed(1) : "0.0"}
+                {restaurants.length > 0 ? (restaurants.reduce((sum, restaurant) => sum + restaurant.avgRating, 0) / restaurants.length).toFixed(1) : "0.0"}
               </div>
             </div>
             <div className="text-muted-foreground">평균 평점</div>

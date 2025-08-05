@@ -11,44 +11,45 @@ export interface ApiResponse<T> {
 export interface Restaurant {
   id: number;
   name: string;
-  address: string;
-  phone: string;
-  openHours: string;
+  address: {
+    roadAddr: string;
+    jibunAddr?: string;
+  };
   score: number;
-  reviewCount: number;
-  category: string;
-  specialties: string[];
+  avgRating: number;
   imageUrl: string;
-  priceRange: string;
-  district: string;
-  latitude?: number;
-  longitude?: number;
-  description?: string;
-  liked?: boolean;
+  latitude: number;
+  longitude: number;
+  isLiked?: boolean;
 }
 
 export interface Review {
-  id: number;
+  restaurantName: string;
+  rating: number;
   content: string;
-  score: number;
-  restaurantId: number;
-  memberId: number;
-  memberNickname: string;
-  imageUrls: string[];
+  nickname: string;
   createdAt: string;
+  images: string[];
 }
 
 export interface CreateReviewRequest {
   restaurantId: number;
+  rating: number;
   content: string;
-  score: number;
 }
 
 export interface Member {
   id: number;
   email: string;
   nickname: string;
-  profileImage?: string;
+  profileImageUrl?: string;
+  grade: string;
+  nextGrade: string;
+  startReviewCount: number;
+  endReviewCount: number;
+  remainingReviewCount: number;
+  reviewCount: number;
+  likeCount: number;
 }
 
 export interface SearchFilters {
