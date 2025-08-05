@@ -1,7 +1,5 @@
 // API Base Configuration
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://your-backend-domain.com/api' 
-  : 'http://localhost:8080/api';
+const API_BASE_URL = 'http://localhost:8080/api';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -10,39 +8,47 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
-export interface RamenShop {
+export interface Restaurant {
   id: number;
   name: string;
   address: string;
   phone: string;
   openHours: string;
-  rating: number;
-  ratingCount: number;
+  score: number;
+  reviewCount: number;
   category: string;
   specialties: string[];
-  image: string;
+  imageUrl: string;
   priceRange: string;
   district: string;
   latitude?: number;
   longitude?: number;
   description?: string;
-  createdAt: string;
-  updatedAt: string;
+  liked?: boolean;
 }
 
-export interface Rating {
+export interface Review {
   id: number;
-  shopId: number;
-  userId: string;
-  rating: number;
-  review?: string;
+  content: string;
+  score: number;
+  restaurantId: number;
+  memberId: number;
+  memberNickname: string;
+  imageUrls: string[];
   createdAt: string;
 }
 
-export interface CreateRatingRequest {
-  shopId: number;
-  rating: number;
-  review?: string;
+export interface CreateReviewRequest {
+  restaurantId: number;
+  content: string;
+  score: number;
+}
+
+export interface Member {
+  id: number;
+  email: string;
+  nickname: string;
+  profileImage?: string;
 }
 
 export interface SearchFilters {
@@ -116,90 +122,105 @@ class ApiService {
   }
 
   // 라멘집 관련 API
-  async getRamenShops(filters?: SearchFilters): Promise<ApiResponse<RamenShop[]>> {
-    const queryParams = new URLSearchParams();
-    
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== '') {
-          queryParams.append(key, value.toString());
-        }
-      });
+  async getRestaurants(keyword?: string): Promise<ApiResponse<Restaurant[]>> {
+    if (keyword) {
+      return this.makeRequest<Restaurant[]>(`/restaurants/search?keyword=${encodeURIComponent(keyword)}`);
     }
-
-    const endpoint = `/shops${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    return this.makeRequest<RamenShop[]>(endpoint);
+    return this.makeRequest<Restaurant[]>('/restaurants');
   }
 
-  async getRamenShop(id: number): Promise<ApiResponse<RamenShop>> {
-    return this.makeRequest<RamenShop>(`/shops/${id}`);
+  async getRestaurant(id: number): Promise<ApiResponse<Restaurant>> {
+    return this.makeRequest<Restaurant>(`/restaurants/${id}`);
   }
 
-  async createRamenShop(shop: Omit<RamenShop, 'id' | 'createdAt' | 'updatedAt'>): Promise<ApiResponse<RamenShop>> {
-    return this.makeRequest<RamenShop>('/shops', {
+  async getRandomRestaurant(): Promise<ApiResponse<Restaurant>> {
+    return this.makeRequest<Restaurant>('/restaurants/random');
+  }
+
+  async getRestaurantRanking(): Promise<ApiResponse<Restaurant[]>> {
+    return this.makeRequest<Restaurant[]>('/restaurants/rank');
+  }
+
+  // 리뷰 관련 API
+  async createReview(review: CreateReviewRequest): Promise<ApiResponse<string>> {
+    return this.makeRequest<string>('/reviews', {
       method: 'POST',
-      body: JSON.stringify(shop),
+      body: JSON.stringify(review),
     });
   }
 
-  async updateRamenShop(id: number, shop: Partial<RamenShop>): Promise<ApiResponse<RamenShop>> {
-    return this.makeRequest<RamenShop>(`/shops/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(shop),
-    });
+  async getReviews(): Promise<ApiResponse<Review[]>> {
+    return this.makeRequest<Review[]>('/reviews');
   }
 
-  async deleteRamenShop(id: number): Promise<ApiResponse<void>> {
-    return this.makeRequest<void>(`/shops/${id}`, {
-      method: 'DELETE',
-    });
+  async getRestaurantReviews(restaurantId: number): Promise<ApiResponse<Review[]>> {
+    return this.makeRequest<Review[]>(`/reviews/${restaurantId}`);
   }
 
-  // 평점 관련 API
-  async createRating(rating: CreateRatingRequest): Promise<ApiResponse<Rating>> {
-    return this.makeRequest<Rating>('/ratings', {
+  // 찜 관련 API
+  async getLikedRestaurants(): Promise<ApiResponse<Restaurant[]>> {
+    return this.makeRequest<Restaurant[]>('/likes');
+  }
+
+  async toggleLike(restaurantId: number): Promise<ApiResponse<boolean>> {
+    return this.makeRequest<boolean>(`/likes/${restaurantId}`, {
       method: 'POST',
-      body: JSON.stringify(rating),
     });
   }
 
-  async getRatings(shopId: number): Promise<ApiResponse<Rating[]>> {
-    return this.makeRequest<Rating[]>(`/ratings/shop/${shopId}`);
-  }
-
-  async getUserRatings(): Promise<ApiResponse<Rating[]>> {
-    return this.makeRequest<Rating[]>('/ratings/user');
-  }
-
-  // 인증 관련 API (필요시)
-  async login(email: string, password: string): Promise<ApiResponse<{ token: string; user: any }>> {
-    const response = await this.makeRequest<{ token: string; user: any }>('/auth/login', {
+  // 인증 관련 API
+  async login(email: string, password: string): Promise<ApiResponse<{ accessToken: string; refreshToken: string }>> {
+    const response = await this.makeRequest<{ accessToken: string; refreshToken: string }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
 
-    if (response.success && response.data.token) {
-      this.setAuthToken(response.data.token);
+    if (response.success && response.data.accessToken) {
+      this.setAuthToken(response.data.accessToken);
     }
 
     return response;
   }
 
-  async register(userData: { email: string; password: string; name: string }): Promise<ApiResponse<{ token: string; user: any }>> {
-    const response = await this.makeRequest<{ token: string; user: any }>('/auth/register', {
+  async sendEmailCode(email: string): Promise<ApiResponse<void>> {
+    return this.makeRequest<void>('/auth/send-email', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  async verifyEmailCode(email: string, code: string): Promise<ApiResponse<void>> {
+    return this.makeRequest<void>('/auth/verification', {
+      method: 'POST',
+      body: JSON.stringify({ email, code }),
+    });
+  }
+
+  async verifyNickname(nickname: string): Promise<ApiResponse<void>> {
+    return this.makeRequest<void>('/auth/verification-nickname', {
+      method: 'POST',
+      body: JSON.stringify({ nickname }),
+    });
+  }
+
+  async signup(userData: { email: string; password: string; nickname: string }): Promise<ApiResponse<void>> {
+    return this.makeRequest<void>('/auth/signup', {
       method: 'POST',
       body: JSON.stringify(userData),
     });
+  }
 
-    if (response.success && response.data.token) {
-      this.setAuthToken(response.data.token);
-    }
-
+  async logout(): Promise<ApiResponse<void>> {
+    const response = await this.makeRequest<void>('/auth/logout', {
+      method: 'POST',
+    });
+    this.clearAuthToken();
     return response;
   }
 
-  async logout(): Promise<void> {
-    this.clearAuthToken();
+  // 회원 정보 관련 API
+  async getMemberInfo(): Promise<ApiResponse<Member>> {
+    return this.makeRequest<Member>('/members');
   }
 }
 

@@ -81,13 +81,13 @@ const RamenShopCard = ({ shop, onRate }: RamenShopCardProps) => {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-1">
-          {shop.specialties.map((specialty, index) => (
-            <Badge key={index} variant="outline" className="text-xs">
-              {specialty}
-            </Badge>
-          ))}
-        </div>
+          <div className="flex flex-wrap gap-1">
+            {restaurant.specialties.map((specialty, index) => (
+              <Badge key={index} variant="outline" className="text-xs">
+                {specialty}
+              </Badge>
+            ))}
+          </div>
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">

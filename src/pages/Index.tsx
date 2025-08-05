@@ -17,7 +17,7 @@ import ramen4 from "@/assets/ramen-4.jpg";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const { shops, loading, error, updateFilters } = useRamenShops();
+  const { restaurants, loading, error, searchRestaurants } = useRestaurants();
   const { submitRating, loading: ratingLoading } = useRating();
   const { toast } = useToast();
 
