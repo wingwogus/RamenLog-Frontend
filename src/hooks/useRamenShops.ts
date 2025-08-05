@@ -114,9 +114,7 @@ const getSampleData = (): Restaurant[] => [
     district: "강남구",
     latitude: 37.5665,
     longitude: 126.978,
-    description: "정통 일본식 돈코츠 라멘 전문점",
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z"
+    description: "정통 일본식 돈코츠 라멘 전문점"
   },
   {
     id: 2,
@@ -133,9 +131,7 @@ const getSampleData = (): Restaurant[] => [
     district: "마포구",
     latitude: 37.5547,
     longitude: 126.9236,
-    description: "깊은 맛의 미소 라멘",
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z"
+    description: "깊은 맛의 미소 라멘"
   },
   {
     id: 3,
@@ -152,9 +148,7 @@ const getSampleData = (): Restaurant[] => [
     district: "용산구",
     latitude: 37.5384,
     longitude: 126.9956,
-    description: "깔끔한 쇼유 베이스 라멘",
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z"
+    description: "깔끔한 쇼유 베이스 라멘"
   },
   {
     id: 4,
@@ -171,8 +165,6 @@ const getSampleData = (): Restaurant[] => [
     district: "송파구",
     latitude: 37.5125,
     longitude: 127.1025,
-    description: "한국식 매운 라멘 전문점",
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z"
+    description: "한국식 매운 라멘 전문점"
   }
 ];

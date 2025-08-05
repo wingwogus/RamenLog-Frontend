@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import RamenShopCard from "@/components/RamenShopCard";
 import SearchAndFilter from "@/components/SearchAndFilter";
 import { useToast } from "@/hooks/use-toast";
-import { useRamenShops, useRating } from "@/hooks/useRamenShops";
+import { useRestaurants, useReview } from "@/hooks/useRamenShops";
 import { SearchFilters } from "@/services/api";
 import { Utensils, MapPin, TrendingUp, Star, Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -18,20 +18,20 @@ import ramen4 from "@/assets/ramen-4.jpg";
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { restaurants, loading, error, searchRestaurants } = useRestaurants();
-  const { submitRating, loading: ratingLoading } = useRating();
+  const { submitReview, loading: ratingLoading } = useReview();
   const { toast } = useToast();
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    updateFilters({ search: query });
+    searchRestaurants(query);
   };
 
-  const handleFilter = (filters: SearchFilters) => {
-    updateFilters({ ...filters, search: searchQuery });
+  const handleFilter = (filters: any) => {
+    // 필터링 로직은 나중에 구현
   };
 
   const handleRating = async (shopId: number, rating: number) => {
-    const success = await submitRating(shopId, rating);
+    const success = await submitReview(shopId, rating, "");
     
     if (success) {
       toast({
@@ -48,9 +48,9 @@ const Index = () => {
   };
 
   // 이미지 경로 매핑 (백엔드에서 이미지 URL이 안 올 경우)
-  const getImageUrl = (shop: any) => {
-    if (shop.image?.startsWith('http')) {
-      return shop.image;
+  const getImageUrl = (restaurant: any) => {
+    if (restaurant.imageUrl?.startsWith('http')) {
+      return restaurant.imageUrl;
     }
     // 로컬 이미지 매핑
     const imageMap: Record<number, string> = {
@@ -59,13 +59,13 @@ const Index = () => {
       3: ramen3,
       4: ramen4,
     };
-    return imageMap[shop.id] || ramen1;
+    return imageMap[restaurant.id] || ramen1;
   };
 
   // 상점 데이터에 로컬 이미지 URL 적용
-  const shopsWithImages = shops.map(shop => ({
-    ...shop,
-    image: getImageUrl(shop)
+  const restaurantsWithImages = restaurants.map(restaurant => ({
+    ...restaurant,
+    imageUrl: getImageUrl(restaurant)
   }));
 
   if (loading) {
@@ -133,12 +133,12 @@ const Index = () => {
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <div className="bg-card rounded-lg p-6 text-center shadow-card">
-            <div className="text-3xl font-bold text-primary mb-2">{shops.length}</div>
+            <div className="text-3xl font-bold text-primary mb-2">{restaurants.length}</div>
             <div className="text-muted-foreground">등록된 라멘집</div>
           </div>
           <div className="bg-card rounded-lg p-6 text-center shadow-card">
             <div className="text-3xl font-bold text-accent mb-2">
-              {(shops.reduce((sum, shop) => sum + shop.ratingCount, 0)).toLocaleString()}
+              {(restaurants.reduce((sum, restaurant) => sum + restaurant.reviewCount, 0)).toLocaleString()}
             </div>
             <div className="text-muted-foreground">총 리뷰 수</div>
           </div>
@@ -146,7 +146,7 @@ const Index = () => {
             <div className="flex items-center justify-center gap-1 mb-2">
               <Star className="w-6 h-6 fill-accent text-accent" />
               <div className="text-3xl font-bold text-accent">
-                {shops.length > 0 ? (shops.reduce((sum, shop) => sum + shop.rating, 0) / shops.length).toFixed(1) : "0.0"}
+                {restaurants.length > 0 ? (restaurants.reduce((sum, restaurant) => sum + restaurant.score, 0) / restaurants.length).toFixed(1) : "0.0"}
               </div>
             </div>
             <div className="text-muted-foreground">평균 평점</div>
@@ -166,14 +166,14 @@ const Index = () => {
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-foreground">
-              검색 결과 <span className="text-primary">{shopsWithImages.length}개</span>
+              검색 결과 <span className="text-primary">{restaurantsWithImages.length}개</span>
             </h3>
             {searchQuery && (
               <Button
                 variant="ghost"
                 onClick={() => {
                   setSearchQuery("");
-                  updateFilters({});
+                  searchRestaurants("");
                 }}
                 className="text-sm"
               >
@@ -184,12 +184,12 @@ const Index = () => {
         </div>
 
         {/* Shop Grid */}
-        {shopsWithImages.length > 0 ? (
+        {restaurantsWithImages.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {shopsWithImages.map((shop) => (
+            {restaurantsWithImages.map((restaurant) => (
               <RamenShopCard 
-                key={shop.id} 
-                shop={shop} 
+                key={restaurant.id} 
+                restaurant={restaurant} 
                 onRate={handleRating} 
               />
             ))}
@@ -209,7 +209,7 @@ const Index = () => {
               variant="outline"
               onClick={() => {
                 setSearchQuery("");
-                updateFilters({});
+                searchRestaurants("");
               }}
             >
               전체 라멘집 보기
