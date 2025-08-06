@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import RamenShopCard from "@/components/RamenShopCard";
@@ -7,8 +7,10 @@ import SearchAndFilter from "@/components/SearchAndFilter";
 import { useToast } from "@/hooks/use-toast";
 import { useRestaurants, useReview } from "@/hooks/useRamenShops";
 import { SearchFilters } from "@/services/api";
-import { Utensils, MapPin, TrendingUp, Star, Loader2, AlertCircle, User } from "lucide-react";
+import { Utensils, MapPin, TrendingUp, Star, Loader2, AlertCircle, User, LogOut, Heart } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { LoginModal } from "@/components/auth/LoginModal";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Import ramen images
 import ramen1 from "@/assets/ramen-1.jpg";
@@ -19,9 +21,11 @@ import ramen4 from "@/assets/ramen-4.jpg";
 const Index = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const { restaurants, loading, error, searchRestaurants } = useRestaurants();
   const { submitReview, loading: ratingLoading } = useReview();
   const { toast } = useToast();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -101,14 +105,30 @@ const Index = () => {
                 <MapPin className="w-4 h-4" />
                 <span>서울</span>
               </div>
-              <Button 
-                variant="outline" 
-                onClick={() => navigate('/profile')}
-                className="flex items-center gap-2"
-              >
-                <User className="h-4 w-4" />
-                <span className="hidden sm:inline">마이페이지</span>
-              </Button>
+              {isAuthenticated ? (
+                <>
+                  <Button variant="outline" size="sm">
+                    <Heart className="h-4 w-4" />
+                  </Button>
+                  <Link to="/profile">
+                    <Button variant="outline" size="sm">
+                      <User className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <Button variant="outline" size="sm" onClick={logout}>
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" size="sm" onClick={() => setShowLoginModal(true)}>
+                    로그인
+                  </Button>
+                  <Link to="/signup">
+                    <Button size="sm">회원가입</Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -249,6 +269,11 @@ const Index = () => {
           </div>
         </div>
       </footer>
+      
+      <LoginModal 
+        open={showLoginModal} 
+        onOpenChange={setShowLoginModal} 
+      />
     </div>
   );
 };

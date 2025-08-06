@@ -37,6 +37,11 @@ export interface CreateReviewRequest {
   content: string;
 }
 
+export interface JwtToken {
+  accessToken: string;
+  refreshToken: string;
+}
+
 export interface Member {
   id: number;
   email: string;
@@ -169,8 +174,8 @@ class ApiService {
   }
 
   // 인증 관련 API
-  async login(email: string, password: string): Promise<ApiResponse<{ accessToken: string; refreshToken: string }>> {
-    const response = await this.makeRequest<{ accessToken: string; refreshToken: string }>('/auth/login', {
+  async login(email: string, password: string): Promise<ApiResponse<JwtToken>> {
+    const response = await this.makeRequest<JwtToken>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });

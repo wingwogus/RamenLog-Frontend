@@ -103,7 +103,7 @@ const getSampleData = (): Restaurant[] => [
     id: 1,
     name: "라멘야마토",
     address: {
-      roadAddr: "서울특별시 강남구 테헤란로 123"
+      fullAddress: "서울특별시 강남구 테헤란로 123"
     },
     score: 4.5,
     avgRating: 4.5,
@@ -115,7 +115,7 @@ const getSampleData = (): Restaurant[] => [
     id: 2,
     name: "미소라멘 하우스",
     address: {
-      roadAddr: "서울특별시 마포구 홍대입구 456"
+      fullAddress: "서울특별시 마포구 홍대입구 456"
     },
     score: 4.3,
     avgRating: 4.3,
@@ -127,7 +127,7 @@ const getSampleData = (): Restaurant[] => [
     id: 3,
     name: "쇼유라멘 전문점",
     address: {
-      roadAddr: "서울특별시 용산구 이태원로 789"
+      fullAddress: "서울특별시 용산구 이태원로 789"
     },
     score: 4.7,
     avgRating: 4.7,
@@ -139,7 +139,7 @@ const getSampleData = (): Restaurant[] => [
     id: 4,
     name: "매운라멘 코리아",
     address: {
-      roadAddr: "서울특별시 송파구 잠실동 101"
+      fullAddress: "서울특별시 송파구 잠실동 101"
     },
     score: 4.4,
     avgRating: 4.4,
