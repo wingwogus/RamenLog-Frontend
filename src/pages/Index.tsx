@@ -53,6 +53,11 @@ const Index = () => {
     }
   };
 
+  const handleLikeToggle = () => {
+    // 찜 상태 변경 후 목록 새로고침
+    // refreshRestaurants();
+  };
+
   // 이미지 경로 매핑 (백엔드에서 이미지 URL이 안 올 경우)
   const getImageUrl = (restaurant: any) => {
     if (restaurant.imageUrl?.startsWith('http')) {
@@ -216,7 +221,8 @@ const Index = () => {
               <RamenShopCard 
                 key={restaurant.id} 
                 restaurant={restaurant} 
-                onRate={handleRating} 
+                onRate={handleRating}
+                onLikeToggle={handleLikeToggle}
               />
             ))}
           </div>

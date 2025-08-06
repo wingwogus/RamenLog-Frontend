@@ -4,25 +4,63 @@ import { Button } from "@/components/ui/button";
 import { Star, MapPin, Clock, Phone, Heart } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Restaurant } from "@/services/api";
+import { Restaurant, apiService } from "@/services/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface RamenShopCardProps {
   restaurant: Restaurant;
   onRate: (shopId: number, rating: number) => void;
+  onLikeToggle?: () => void;
 }
 
-const RamenShopCard = ({ restaurant, onRate }: RamenShopCardProps) => {
+const RamenShopCard = ({ restaurant, onRate, onLikeToggle }: RamenShopCardProps) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [userRating, setUserRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
+  const [isLiked, setIsLiked] = useState(restaurant.isLiked || false);
+  const [isLiking, setIsLiking] = useState(false);
 
   const handleRating = (rating: number) => {
     setUserRating(rating);
     onRate(restaurant.id, rating);
   };
 
+  const handleLikeToggle = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!user) {
+      toast.error("로그인이 필요합니다.");
+      return;
+    }
+
+    setIsLiking(true);
+    try {
+      const response = await apiService.toggleLike(restaurant.id);
+      if (response.success) {
+        setIsLiked(response.data);
+        onLikeToggle?.();
+        toast.success(response.data ? "찜 목록에 추가되었습니다" : "찜 목록에서 제거되었습니다");
+      } else {
+        toast.error("오류가 발생했습니다");
+      }
+    } catch (error) {
+      toast.error("오류가 발생했습니다");
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
+  const handleCardClick = () => {
+    navigate(`/restaurant/${restaurant.id}`);
+  };
+
   return (
-    <Card className="group overflow-hidden transition-all duration-300 hover:shadow-card hover:-translate-y-1">
+    <Card 
+      className="group overflow-hidden transition-all duration-300 hover:shadow-card hover:-translate-y-1 cursor-pointer"
+      onClick={handleCardClick}
+    >
         <div className="relative overflow-hidden h-48">
           <img 
             src={restaurant.imageUrl} 
@@ -30,12 +68,20 @@ const RamenShopCard = ({ restaurant, onRate }: RamenShopCardProps) => {
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
           <div className="absolute top-3 right-3 flex gap-2">
-            {restaurant.isLiked && (
-              <Badge variant="secondary" className="bg-red-500/80 text-white backdrop-blur-sm">
-                <Heart className="w-3 h-3 mr-1 fill-current" />
-                찜
-              </Badge>
-            )}
+            <Button
+              size="sm"
+              variant={isLiked ? "default" : "secondary"}
+              onClick={handleLikeToggle}
+              disabled={isLiking}
+              className={`backdrop-blur-sm ${
+                isLiked 
+                  ? "bg-red-500/90 hover:bg-red-600/90 text-white" 
+                  : "bg-white/90 hover:bg-white text-gray-700"
+              }`}
+            >
+              <Heart className={`w-3 h-3 mr-1 ${isLiked ? "fill-current" : ""}`} />
+              {isLiked ? "찜" : "찜"}
+            </Button>
           </div>
         </div>
       
@@ -63,7 +109,10 @@ const RamenShopCard = ({ restaurant, onRate }: RamenShopCardProps) => {
           <Button 
             variant="outline" 
             className="w-full"
-            onClick={() => navigate(`/review/${restaurant.id}`)}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/review/${restaurant.id}`);
+            }}
           >
             리뷰 작성
           </Button>

@@ -31,9 +31,14 @@ const SearchAndFilter = ({ onSearch, onFilter, activeFilters }: SearchAndFilterP
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
-  const handleSearch = (value: string) => {
-    setSearchQuery(value);
-    onSearch(value);
+  const handleSearchSubmit = () => {
+    onSearch(searchQuery);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearchSubmit();
+    }
   };
 
   const handleFilterChange = (key: keyof FilterOptions, value: string | number) => {
@@ -66,9 +71,17 @@ const SearchAndFilter = ({ onSearch, onFilter, activeFilters }: SearchAndFilterP
         <Input
           placeholder="라멘집 이름 또는 지역으로 검색..."
           value={searchQuery}
-          onChange={(e) => handleSearch(e.target.value)}
-          className="pl-10 h-12"
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyPress={handleKeyPress}
+          className="pl-10 pr-12 h-12"
         />
+        <Button
+          size="sm"
+          onClick={handleSearchSubmit}
+          className="absolute right-1 top-1/2 transform -translate-y-1/2 h-10 px-3"
+        >
+          <Search className="w-4 h-4" />
+        </Button>
       </div>
 
       {/* Filter Toggle */}

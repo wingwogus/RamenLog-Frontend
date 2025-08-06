@@ -8,6 +8,9 @@ import Index from "./pages/Index";
 import ReviewPage from "./pages/ReviewPage";
 import ProfilePage from "./pages/ProfilePage";
 import SignupPage from "./pages/SignupPage";
+import RestaurantDetailPage from "./pages/RestaurantDetailPage";
+import MyReviewsPage from "./pages/MyReviewsPage";
+import LikedRestaurantsPage from "./pages/LikedRestaurantsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,9 +24,12 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/review/:id" element={<ReviewPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/restaurant/:id" element={<RestaurantDetailPage />} />
+            <Route path="/review/:id" element={<ReviewPage />} />
+            <Route path="/my-reviews" element={<MyReviewsPage />} />
+            <Route path="/liked-restaurants" element={<LikedRestaurantsPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

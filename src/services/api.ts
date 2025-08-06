@@ -173,6 +173,11 @@ class ApiService {
     });
   }
 
+  // 회원 리뷰 관련 API
+  async getMyReviews(): Promise<ApiResponse<Review[]>> {
+    return this.makeRequest<Review[]>('/reviews');
+  }
+
   // 인증 관련 API
   async login(email: string, password: string): Promise<ApiResponse<JwtToken>> {
     const response = await this.makeRequest<JwtToken>('/auth/login', {
