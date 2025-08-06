@@ -7,7 +7,7 @@ import SearchAndFilter from "@/components/SearchAndFilter";
 import { useToast } from "@/hooks/use-toast";
 import { useRestaurants, useReview } from "@/hooks/useRamenShops";
 import { SearchFilters } from "@/services/api";
-import { Utensils, MapPin, TrendingUp, Star, Loader2, AlertCircle, User, LogOut, Heart } from "lucide-react";
+import { Utensils, MapPin, TrendingUp, Star, Loader2, AlertCircle, User, LogOut, Heart, Map } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { useAuth } from "@/contexts/AuthContext";
@@ -115,7 +115,14 @@ const Index = () => {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={() => navigate('/liked')}
+                    onClick={() => navigate('/map')}
+                  >
+                    <Map className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate('/liked-restaurants')}
                   >
                     <Heart className="h-4 w-4" />
                   </Button>
@@ -173,7 +180,7 @@ const Index = () => {
           </div>
           <div className="bg-card rounded-lg p-6 text-center shadow-card">
             <div className="text-3xl font-bold text-accent mb-2">
-              {Math.floor(Math.random() * 1000) + 500}
+              {1000 + restaurants.reduce((sum, restaurant) => sum + (restaurant.reviewCount || 0), 0)}
             </div>
             <div className="text-muted-foreground">총 리뷰 수</div>
           </div>

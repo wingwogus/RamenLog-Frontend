@@ -39,9 +39,10 @@ const RamenShopCard = ({ restaurant, onRate, onLikeToggle }: RamenShopCardProps)
     try {
       const response = await apiService.toggleLike(restaurant.id);
       if (response.success) {
-        setIsLiked(response.data);
+        const newLikedState = response.data;
+        setIsLiked(newLikedState);
         onLikeToggle?.();
-        toast.success(response.data ? "찜 목록에 추가되었습니다" : "찜 목록에서 제거되었습니다");
+        toast.success(newLikedState ? "찜 목록에 추가되었습니다" : "찜 목록에서 제거되었습니다");
       } else {
         toast.error("오류가 발생했습니다");
       }

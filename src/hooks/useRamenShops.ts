@@ -140,7 +140,8 @@ const getSampleData = (): Restaurant[] => [
     avgRating: 4.5,
     imageUrl: "/src/assets/ramen-1.jpg",
     latitude: 37.5665,
-    longitude: 126.978
+    longitude: 126.978,
+    reviewCount: 1032
   },
   {
     id: 2,
@@ -152,7 +153,8 @@ const getSampleData = (): Restaurant[] => [
     avgRating: 4.3,
     imageUrl: "/src/assets/ramen-2.jpg",
     latitude: 37.5547,
-    longitude: 126.9236
+    longitude: 126.9236,
+    reviewCount: 1087
   },
   {
     id: 3,
@@ -164,7 +166,8 @@ const getSampleData = (): Restaurant[] => [
     avgRating: 4.7,
     imageUrl: "/src/assets/ramen-3.jpg",
     latitude: 37.5384,
-    longitude: 126.9956
+    longitude: 126.9956,
+    reviewCount: 1156
   },
   {
     id: 4,
@@ -176,6 +179,7 @@ const getSampleData = (): Restaurant[] => [
     avgRating: 4.4,
     imageUrl: "/src/assets/ramen-4.jpg",
     latitude: 37.5125,
-    longitude: 127.1025
+    longitude: 127.1025,
+    reviewCount: 1021
   }
 ];

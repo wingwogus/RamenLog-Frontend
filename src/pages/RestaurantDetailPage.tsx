@@ -66,8 +66,9 @@ const RestaurantDetailPage = () => {
     try {
       const response = await apiService.toggleLike(restaurant.id);
       if (response.success) {
-        setIsLiked(response.data);
-        toast.success(response.data ? "찜 목록에 추가되었습니다" : "찜 목록에서 제거되었습니다");
+        const newLikedState = response.data;
+        setIsLiked(newLikedState);
+        toast.success(newLikedState ? "찜 목록에 추가되었습니다" : "찜 목록에서 제거되었습니다");
       } else {
         toast.error("오류가 발생했습니다");
       }

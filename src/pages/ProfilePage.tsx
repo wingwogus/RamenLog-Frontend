@@ -6,14 +6,45 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ArrowLeft, Heart, MessageSquare, Star } from 'lucide-react';
 
 const gradeConfig = {
-  '멘알못': { color: 'bg-slate-500', textColor: 'text-slate-100', description: '라멘 입문자' },
-  '라린이': { color: 'bg-green-500', textColor: 'text-green-100', description: '라멘 초보자' },
-  '라더쿠': { color: 'bg-blue-500', textColor: 'text-blue-100', description: '라멘 애호가' },
-  '라전드': { color: 'bg-purple-500', textColor: 'text-purple-100', description: '라멘 고수' },
-  '라오타': { color: 'bg-gradient-to-r from-yellow-400 to-orange-500', textColor: 'text-yellow-100', description: '라멘 마스터' },
+  '멘알못': { 
+    color: 'bg-slate-500', 
+    textColor: 'text-slate-100', 
+    description: '라멘 입문자',
+    details: '라멘을 처음 시작하는 단계입니다.',
+    condition: '리뷰 1개 이상'
+  },
+  '라린이': { 
+    color: 'bg-green-500', 
+    textColor: 'text-green-100', 
+    description: '라멘 초보자',
+    details: '라멘의 기본기를 익혀가는 단계입니다.',
+    condition: '리뷰 5개 이상'
+  },
+  '라더쿠': { 
+    color: 'bg-blue-500', 
+    textColor: 'text-blue-100', 
+    description: '라멘 애호가',
+    details: '다양한 라멘을 경험하며 안목이 생기는 단계입니다.',
+    condition: '리뷰 20개 이상'
+  },
+  '라전드': { 
+    color: 'bg-purple-500', 
+    textColor: 'text-purple-100', 
+    description: '라멘 고수',
+    details: '라멘에 대한 깊은 이해와 경험을 갖춘 단계입니다.',
+    condition: '리뷰 50개 이상'
+  },
+  '라오타': { 
+    color: 'bg-gradient-to-r from-yellow-400 to-orange-500', 
+    textColor: 'text-yellow-100', 
+    description: '라멘 마스터',
+    details: '라멘의 모든 것을 아는 최고의 경지입니다.',
+    condition: '리뷰 100개 이상'
+  },
 };
 
 const ProfilePage = () => {
@@ -94,11 +125,24 @@ const ProfilePage = () => {
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-3">
                   <h2 className="text-2xl font-bold">{member.nickname}</h2>
-                  <Badge 
-                    className={`${gradeInfo.color} ${gradeInfo.textColor} px-3 py-1`}
-                  >
-                    {member.grade}
-                  </Badge>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge 
+                          className={`${gradeInfo.color} ${gradeInfo.textColor} px-3 py-1 cursor-help`}
+                        >
+                          {member.grade}
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs">
+                        <div className="space-y-2">
+                          <p className="font-semibold">{member.grade}</p>
+                          <p className="text-sm">{gradeInfo.details}</p>
+                          <p className="text-xs text-muted-foreground">승급 조건: {gradeInfo.condition}</p>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
                 <p className="text-muted-foreground">{member.email}</p>
                 <p className="text-sm text-muted-foreground">{gradeInfo.description}</p>
@@ -137,19 +181,41 @@ const ProfilePage = () => {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-yellow-500/10 rounded-lg">
-                  <Star className="h-5 w-5 text-yellow-500" />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Card className="cursor-help">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-yellow-500/10 rounded-lg">
+                        <Star className="h-5 w-5 text-yellow-500" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{member.grade}</p>
+                        <p className="text-sm text-muted-foreground">현재 등급</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-sm">
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-center">등급 시스템</h4>
+                  {Object.entries(gradeConfig).map(([grade, config]) => (
+                    <div key={grade} className="flex items-center gap-2 text-sm">
+                      <Badge className={`${config.color} ${config.textColor} text-xs px-2 py-0.5`}>
+                        {grade}
+                      </Badge>
+                      <div className="flex-1">
+                        <p className="text-xs">{config.details}</p>
+                        <p className="text-xs text-muted-foreground">{config.condition}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div>
-                  <p className="text-2xl font-bold">{member.grade}</p>
-                  <p className="text-sm text-muted-foreground">현재 등급</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         {/* Grade Progress */}

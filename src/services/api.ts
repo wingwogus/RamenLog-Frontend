@@ -20,6 +20,7 @@ export interface Restaurant {
   latitude: number;
   longitude: number;
   isLiked?: boolean;
+  reviewCount?: number;
 }
 
 export interface Review {
