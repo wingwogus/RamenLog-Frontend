@@ -1,5 +1,5 @@
 // API Base Configuration
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = '/api';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -12,8 +12,7 @@ export interface Restaurant {
   id: number;
   name: string;
   address: {
-    roadAddr: string;
-    jibunAddr?: string;
+    fullAddress: string;
   };
   score: number;
   avgRating: number;

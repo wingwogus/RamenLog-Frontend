@@ -55,7 +55,7 @@ const RamenShopCard = ({ restaurant, onRate }: RamenShopCardProps) => {
         <div className="space-y-2 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4" />
-            <span className="line-clamp-1">{restaurant.address.roadAddr}</span>
+            <span className="line-clamp-1">{restaurant.address.fullAddress}</span>
           </div>
         </div>
 
