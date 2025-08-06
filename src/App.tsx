@@ -12,6 +12,8 @@ import RestaurantDetailPage from "./pages/RestaurantDetailPage";
 import MyReviewsPage from "./pages/MyReviewsPage";
 import LikedRestaurantsPage from "./pages/LikedRestaurantsPage";
 import NotFound from "./pages/NotFound";
+import ServerError from "./pages/ServerError";
+import Forbidden from "./pages/Forbidden";
 
 const queryClient = new QueryClient();
 
@@ -29,7 +31,9 @@ const App = () => (
             <Route path="/restaurant/:id" element={<RestaurantDetailPage />} />
             <Route path="/review/:id" element={<ReviewPage />} />
             <Route path="/my-reviews" element={<MyReviewsPage />} />
-            <Route path="/liked-restaurants" element={<LikedRestaurantsPage />} />
+            <Route path="/liked" element={<LikedRestaurantsPage />} />
+            <Route path="/500" element={<ServerError />} />
+            <Route path="/403" element={<Forbidden />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

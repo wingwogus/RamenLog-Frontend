@@ -30,8 +30,7 @@ const ratings = [
 
 const sortOptions = [
   { value: "", label: "기본순" },
-  { value: "rating", label: "별점순" },
-  { value: "reviews", label: "리뷰 많은순" }
+  { value: "rating", label: "별점순" }
 ];
 
 const SearchAndFilter = ({ onSearch, onFilter, activeFilters }: SearchAndFilterProps) => {

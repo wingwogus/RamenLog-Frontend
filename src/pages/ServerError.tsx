@@ -1,48 +1,49 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { ChefHat, Home, ArrowLeft, Utensils } from "lucide-react";
+import { AlertTriangle, RefreshCw, Home, Utensils } from "lucide-react";
 
-const NotFound = () => {
+const ServerError = () => {
   const navigate = useNavigate();
+
+  const handleRefresh = () => {
+    window.location.reload();
+  };
 
   return (
     <div className="min-h-screen bg-gradient-warm flex items-center justify-center p-4">
       <Card className="max-w-md w-full text-center">
         <CardContent className="pt-8 pb-8">
           <div className="space-y-6">
-            {/* Ramen Bowl Animation */}
+            {/* Broken Ramen Bowl */}
             <div className="relative mx-auto w-32 h-32 mb-6">
-              <div className="absolute inset-0 bg-gradient-to-b from-amber-100 to-amber-200 rounded-full">
+              <div className="absolute inset-0 bg-gradient-to-b from-gray-200 to-gray-300 rounded-full opacity-50">
                 <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
-                  <ChefHat className="w-12 h-12 text-amber-700" />
-                </div>
-                <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
-                  <Utensils className="w-8 h-8 text-amber-800" />
+                  <Utensils className="w-12 h-12 text-gray-600 opacity-50" />
                 </div>
               </div>
-              <div className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                !
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <AlertTriangle className="w-16 h-16 text-destructive animate-pulse" />
               </div>
             </div>
 
             <div className="space-y-3">
-              <h1 className="text-6xl font-bold text-primary">404</h1>
-              <h2 className="text-2xl font-bold text-foreground">라멘 그릇이 텅 비었어요!</h2>
+              <h1 className="text-6xl font-bold text-destructive">500</h1>
+              <h2 className="text-2xl font-bold text-foreground">주방에 문제가 생겼어요!</h2>
               <p className="text-muted-foreground">
-                죄송합니다. 찾으시는 페이지가 없거나 <br />
-                라멘이 다 떨어졌을 수도 있어요. 🍜
+                서버에 일시적인 문제가 발생했습니다. <br />
+                잠시 후 다시 시도해주세요. 🔧
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
               <Button 
-                onClick={() => navigate(-1)}
+                onClick={handleRefresh}
                 variant="outline"
                 className="flex-1"
               >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                뒤로가기
+                <RefreshCw className="w-4 h-4 mr-2" />
+                새로고침
               </Button>
               <Button 
                 onClick={() => navigate('/')}
@@ -54,7 +55,7 @@ const NotFound = () => {
             </div>
 
             <p className="text-sm text-muted-foreground">
-              맛있는 라멘을 찾으러 다시 돌아가세요!
+              문제가 지속되면 잠시 후 다시 방문해주세요.
             </p>
           </div>
         </CardContent>
@@ -63,4 +64,4 @@ const NotFound = () => {
   );
 };
 
-export default NotFound;
+export default ServerError;

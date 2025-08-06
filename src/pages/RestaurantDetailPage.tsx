@@ -125,7 +125,7 @@ const RestaurantDetailPage = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate('/')}
+            onClick={() => navigate(-1)}
             className="shrink-0"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -145,16 +145,12 @@ const RestaurantDetailPage = () => {
             />
             <div className="absolute top-4 right-4">
               <Button
-                variant={isLiked ? "default" : "secondary"}
+                variant="ghost"
                 onClick={handleLikeToggle}
                 disabled={isLiking}
-                className={`backdrop-blur-sm ${
-                  isLiked 
-                    ? "bg-red-500/90 hover:bg-red-600/90 text-white" 
-                    : "bg-white/90 hover:bg-white text-gray-700"
-                }`}
+                className="backdrop-blur-sm bg-white/90 hover:bg-white"
               >
-                <Heart className={`w-4 h-4 mr-2 ${isLiked ? "fill-current" : ""}`} />
+                <Heart className={`w-5 h-5 mr-2 ${isLiked ? "fill-red-500 text-red-500" : "text-gray-600"}`} />
                 {isLiked ? "찜 완료" : "찜하기"}
               </Button>
             </div>
