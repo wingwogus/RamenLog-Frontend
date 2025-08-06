@@ -16,6 +16,7 @@ interface FilterOptions {
   priceRange?: string;
   rating?: number;
   district?: string;
+  sortBy?: string;
 }
 
 const categories = ["전체", "돈코츠", "미소", "쇼유", "시오", "츠케멘", "마제소바"];
@@ -25,6 +26,12 @@ const ratings = [
   { value: 0, label: "전체" },
   { value: 4, label: "4점 이상" },
   { value: 4.5, label: "4.5점 이상" }
+];
+
+const sortOptions = [
+  { value: "", label: "기본순" },
+  { value: "rating", label: "별점순" },
+  { value: "reviews", label: "리뷰 많은순" }
 ];
 
 const SearchAndFilter = ({ onSearch, onFilter, activeFilters }: SearchAndFilterProps) => {
@@ -142,13 +149,21 @@ const SearchAndFilter = ({ onSearch, onFilter, activeFilters }: SearchAndFilterP
               </button>
             </Badge>
           )}
+          {activeFilters.sortBy && (
+            <Badge variant="secondary" className="gap-1">
+              {sortOptions.find(opt => opt.value === activeFilters.sortBy)?.label}
+              <button onClick={() => clearFilter('sortBy')}>
+                <X className="w-3 h-3" />
+              </button>
+            </Badge>
+          )}
         </div>
       )}
 
       {/* Filter Options */}
       {showFilters && (
         <div className="bg-card border rounded-lg p-4 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">카테고리</label>
               <Select
@@ -219,6 +234,25 @@ const SearchAndFilter = ({ onSearch, onFilter, activeFilters }: SearchAndFilterP
                   {ratings.map((rating) => (
                     <SelectItem key={rating.value} value={rating.value.toString()}>
                       {rating.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">정렬</label>
+              <Select
+                value={activeFilters.sortBy || ""}
+                onValueChange={(value) => handleFilterChange('sortBy', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {sortOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
                     </SelectItem>
                   ))}
                 </SelectContent>

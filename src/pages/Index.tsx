@@ -22,7 +22,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const { restaurants, loading, error, searchRestaurants } = useRestaurants();
+  const { restaurants, loading, error, searchRestaurants, refreshRestaurants, filterAndSortRestaurants } = useRestaurants();
   const { submitReview, loading: ratingLoading } = useReview();
   const { toast } = useToast();
   const { user, isAuthenticated, logout } = useAuth();
@@ -33,7 +33,7 @@ const Index = () => {
   };
 
   const handleFilter = (filters: any) => {
-    // 필터링 로직은 나중에 구현
+    filterAndSortRestaurants(filters);
   };
 
   const handleRating = async (shopId: number, rating: number) => {
@@ -55,7 +55,7 @@ const Index = () => {
 
   const handleLikeToggle = () => {
     // 찜 상태 변경 후 목록 새로고침
-    // refreshRestaurants();
+    refreshRestaurants();
   };
 
   // 이미지 경로 매핑 (백엔드에서 이미지 URL이 안 올 경우)
@@ -112,7 +112,11 @@ const Index = () => {
               </div>
               {isAuthenticated ? (
                 <>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate('/liked')}
+                  >
                     <Heart className="h-4 w-4" />
                   </Button>
                   <Link to="/profile">

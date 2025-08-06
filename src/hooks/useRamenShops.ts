@@ -3,6 +3,7 @@ import { apiService, Restaurant, SearchFilters } from '@/services/api';
 
 export const useRestaurants = (keyword?: string) => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [allRestaurants, setAllRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,11 +15,14 @@ export const useRestaurants = (keyword?: string) => {
 
     if (response.success) {
       setRestaurants(response.data);
+      setAllRestaurants(response.data);
     } else {
       setError(response.error || '라멘집 데이터를 불러오는데 실패했습니다.');
       // 백엔드 연결 실패시 샘플 데이터 사용
       console.warn('API 연결 실패, 샘플 데이터 사용');
-      setRestaurants(getSampleData());
+      const sampleData = getSampleData();
+      setRestaurants(sampleData);
+      setAllRestaurants(sampleData);
     }
 
     setLoading(false);
@@ -27,6 +31,32 @@ export const useRestaurants = (keyword?: string) => {
   const searchRestaurants = useCallback((searchKeyword: string) => {
     fetchRestaurants(searchKeyword);
   }, [fetchRestaurants]);
+
+  const filterAndSortRestaurants = useCallback((filters: any) => {
+    let filtered = [...allRestaurants];
+
+    // Filter by district (주소별 필터링)
+    if (filters.district && filters.district !== "전체") {
+      filtered = filtered.filter(restaurant => 
+        restaurant.address.fullAddress.includes(filters.district)
+      );
+    }
+
+    // Filter by rating
+    if (filters.rating && filters.rating > 0) {
+      filtered = filtered.filter(restaurant => restaurant.avgRating >= filters.rating);
+    }
+
+    // Sort
+    if (filters.sortBy === 'rating') {
+      filtered.sort((a, b) => b.avgRating - a.avgRating);
+    } else if (filters.sortBy === 'reviews') {
+      // For now, using avgRating as proxy for review count
+      filtered.sort((a, b) => b.avgRating - a.avgRating);
+    }
+
+    setRestaurants(filtered);
+  }, [allRestaurants]);
 
   useEffect(() => {
     fetchRestaurants(keyword);
@@ -38,6 +68,7 @@ export const useRestaurants = (keyword?: string) => {
     error,
     searchRestaurants,
     refreshRestaurants: () => fetchRestaurants(keyword),
+    filterAndSortRestaurants,
   };
 };
 
