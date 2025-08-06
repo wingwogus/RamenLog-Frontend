@@ -19,7 +19,7 @@ export interface Restaurant {
   imageUrl: string;
   latitude: number;
   longitude: number;
-  isLiked?: boolean;
+  liked?: boolean;
   reviewCount?: number;
 }
 

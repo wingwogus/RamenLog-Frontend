@@ -21,6 +21,7 @@ import ramen4 from "@/assets/ramen-4.jpg";
 const Index = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
   const { restaurants, loading, error, searchRestaurants, refreshRestaurants, filterAndSortRestaurants } = useRestaurants();
   const { submitReview, loading: ratingLoading } = useReview();
@@ -200,7 +201,8 @@ const Index = () => {
           <SearchAndFilter
             onSearch={handleSearch}
             onFilter={handleFilter}
-            activeFilters={{}}
+            searchKeyword={searchKeyword}
+            setSearchKeyword={setSearchKeyword}
           />
         </div>
 

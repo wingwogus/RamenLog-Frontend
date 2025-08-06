@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { Restaurant, apiService } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import defaultRamenImage from "@/assets/default-ramen.jpg";
 
 interface RamenShopCardProps {
   restaurant: Restaurant;
@@ -19,7 +20,7 @@ const RamenShopCard = ({ restaurant, onRate, onLikeToggle }: RamenShopCardProps)
   const { user } = useAuth();
   const [userRating, setUserRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
-  const [isLiked, setIsLiked] = useState(restaurant.isLiked || false);
+  const [isLiked, setIsLiked] = useState(restaurant.liked || false);
   const [isLiking, setIsLiking] = useState(false);
 
   const handleRating = (rating: number) => {
@@ -35,18 +36,17 @@ const RamenShopCard = ({ restaurant, onRate, onLikeToggle }: RamenShopCardProps)
       return;
     }
 
+    // Optimistic update - toggle immediately on frontend
+    const newLikedState = !isLiked;
+    setIsLiked(newLikedState);
+    
     setIsLiking(true);
     try {
-      const response = await apiService.toggleLike(restaurant.id);
-      if (response.success) {
-        const newLikedState = response.data;
-        setIsLiked(newLikedState);
-        onLikeToggle?.();
-        toast.success(newLikedState ? "찜 목록에 추가되었습니다" : "찜 목록에서 제거되었습니다");
-      } else {
-        toast.error("오류가 발생했습니다");
-      }
+      await apiService.toggleLike(restaurant.id);
+      toast.success(newLikedState ? "찜 목록에 추가되었습니다" : "찜 목록에서 제거되었습니다");
     } catch (error) {
+      // Revert on error
+      setIsLiked(isLiked);
       toast.error("오류가 발생했습니다");
     } finally {
       setIsLiking(false);
@@ -64,9 +64,12 @@ const RamenShopCard = ({ restaurant, onRate, onLikeToggle }: RamenShopCardProps)
     >
         <div className="relative overflow-hidden h-48">
           <img 
-            src={restaurant.imageUrl} 
+            src={restaurant.imageUrl || defaultRamenImage} 
             alt={restaurant.name}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            onError={(e) => {
+              e.currentTarget.src = defaultRamenImage;
+            }}
           />
           <div className="absolute top-3 right-3 flex gap-2">
             <Button

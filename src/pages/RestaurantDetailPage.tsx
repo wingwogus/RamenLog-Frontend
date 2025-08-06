@@ -36,7 +36,7 @@ const RestaurantDetailPage = () => {
 
         if (restaurantResponse.success) {
           setRestaurant(restaurantResponse.data);
-          setIsLiked(restaurantResponse.data.isLiked || false);
+          setIsLiked(restaurantResponse.data.liked || false);
         } else {
           setError(restaurantResponse.error || '라멘집 정보를 불러오는데 실패했습니다.');
         }
@@ -62,17 +62,17 @@ const RestaurantDetailPage = () => {
 
     if (!restaurant) return;
 
+    // Optimistic update - toggle immediately on frontend
+    const newLikedState = !isLiked;
+    setIsLiked(newLikedState);
+    
     setIsLiking(true);
     try {
-      const response = await apiService.toggleLike(restaurant.id);
-      if (response.success) {
-        const newLikedState = response.data;
-        setIsLiked(newLikedState);
-        toast.success(newLikedState ? "찜 목록에 추가되었습니다" : "찜 목록에서 제거되었습니다");
-      } else {
-        toast.error("오류가 발생했습니다");
-      }
+      await apiService.toggleLike(restaurant.id);
+      toast.success(newLikedState ? "찜 목록에 추가되었습니다" : "찜 목록에서 제거되었습니다");
     } catch (error) {
+      // Revert on error
+      setIsLiked(isLiked);
       toast.error("오류가 발생했습니다");
     } finally {
       setIsLiking(false);
