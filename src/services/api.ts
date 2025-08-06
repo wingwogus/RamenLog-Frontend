@@ -95,7 +95,6 @@ class ApiService {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
     };
-
     if (this.authToken) {
       headers['Authorization'] = `Bearer ${this.authToken}`;
     }
@@ -109,6 +108,10 @@ class ApiService {
       const data = await response.json();
 
       if (!response.ok) {
+        if (response.status === 401) {
+          this.clearAuthToken();
+          window.dispatchEvent(new CustomEvent('unauthorized'));
+        }
         throw new Error(data.message || 'API request failed');
       }
 

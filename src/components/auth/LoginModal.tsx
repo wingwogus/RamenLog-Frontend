@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Dialog,
   DialogContent,
@@ -25,6 +25,23 @@ export const LoginModal: React.FC<LoginModalProps> = ({ open, onOpenChange }) =>
   const { login } = useAuth();
   const { toast } = useToast();
 
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      // 로그인 모달 열기
+      onOpenChange(true);
+      toast({
+        title: "권한 없음",
+        description: "로그인이 필요합니다.",
+        variant: "destructive",
+      });
+    };
+
+    window.addEventListener('unauthorized', handleUnauthorized);
+    return () => {
+      window.removeEventListener('unauthorized', handleUnauthorized);
+    };
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -48,6 +65,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ open, onOpenChange }) =>
           description: "라멘로그에 오신 것을 환영합니다!",
         });
         onOpenChange(false);
+        window.location.href = '/';
         setEmail('');
         setPassword('');
       } else {
