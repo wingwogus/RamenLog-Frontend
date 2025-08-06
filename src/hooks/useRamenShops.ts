@@ -33,29 +33,31 @@ export const useRestaurants = (keyword?: string) => {
   }, [fetchRestaurants]);
 
   const filterAndSortRestaurants = useCallback((filters: any) => {
-    let filtered = [...allRestaurants];
+    try {
+      let filtered = [...allRestaurants];
 
-    // Filter by district (주소별 필터링)
-    if (filters.district && filters.district !== "전체") {
-      filtered = filtered.filter(restaurant => 
-        restaurant.address.fullAddress.includes(filters.district)
-      );
+      // Filter by district (주소별 필터링)
+      if (filters.district && filters.district !== "전체") {
+        filtered = filtered.filter(restaurant => 
+          restaurant.address.fullAddress.includes(filters.district)
+        );
+      }
+
+      // Filter by rating
+      if (filters.rating && filters.rating > 0) {
+        filtered = filtered.filter(restaurant => restaurant.avgRating >= filters.rating);
+      }
+
+      // Sort
+      if (filters.sortBy === 'rating') {
+        filtered.sort((a, b) => b.avgRating - a.avgRating);
+      }
+
+      setRestaurants(filtered);
+    } catch (error) {
+      console.error('Filter and sort error:', error);
+      setError('필터링 중 오류가 발생했습니다.');
     }
-
-    // Filter by rating
-    if (filters.rating && filters.rating > 0) {
-      filtered = filtered.filter(restaurant => restaurant.avgRating >= filters.rating);
-    }
-
-    // Sort
-    if (filters.sortBy === 'rating') {
-      filtered.sort((a, b) => b.avgRating - a.avgRating);
-    } else if (filters.sortBy === 'reviews') {
-      // For now, using avgRating as proxy for review count
-      filtered.sort((a, b) => b.avgRating - a.avgRating);
-    }
-
-    setRestaurants(filtered);
   }, [allRestaurants]);
 
   useEffect(() => {

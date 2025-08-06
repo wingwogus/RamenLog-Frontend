@@ -48,11 +48,15 @@ const SearchAndFilter = ({ onSearch, onFilter, activeFilters }: SearchAndFilterP
   };
 
   const handleFilterChange = (key: keyof FilterOptions, value: string | number) => {
-    const newFilters = {
-      ...activeFilters,
-      [key]: value === "전체" || value === 0 ? undefined : value
-    };
-    onFilter(newFilters);
+    try {
+      const newFilters = {
+        ...activeFilters,
+        [key]: value === "전체" || value === 0 ? undefined : value
+      };
+      onFilter(newFilters);
+    } catch (error) {
+      console.error('Filter change error:', error);
+    }
   };
 
   const clearFilter = (key: keyof FilterOptions) => {

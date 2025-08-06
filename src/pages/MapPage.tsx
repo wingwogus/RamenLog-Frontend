@@ -49,7 +49,7 @@ const MapPage = () => {
       }
 
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDf1k4eqDeL5O8GbZsnaMiC1seh6-NK8Fo&callback=initMap`;
       script.async = true;
       script.defer = true;
       
