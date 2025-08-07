@@ -68,7 +68,7 @@ const LikedRestaurantsPage = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-xl font-bold">찜한 라멘집</h1>
+          <h1 className="text-xl font-bold">내 라멘 그릇</h1>
         </div>
       </div>
 
@@ -77,7 +77,7 @@ const LikedRestaurantsPage = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Heart className="h-5 w-5 text-red-500" />
-              찜한 라멘집 ({restaurants.length})
+              내 라멘 그릇 ({restaurants.length})
             </CardTitle>
           </CardHeader>
           <CardContent>

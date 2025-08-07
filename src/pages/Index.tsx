@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRestaurants, useReview } from "@/hooks/useRamenShops";
 import { SearchFilters } from "@/services/api";
 import { Utensils, MapPin, TrendingUp, Star, Loader2, AlertCircle, User, LogOut, Heart, Map } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,7 +24,7 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const { restaurants, loading, error, pagination, searchRestaurants, refreshRestaurants, filterAndSortRestaurants, loadMoreRestaurants } = useRestaurants();
+  const { restaurants, loading, error, pagination, searchRestaurants, refreshRestaurants, filterAndSortRestaurants, loadMoreRestaurants, goToPage } = useRestaurants();
   const { submitReview, loading: ratingLoading } = useReview();
   const { toast } = useToast();
   const { user, isAuthenticated, logout } = useAuth();
@@ -109,7 +110,22 @@ const Index = () => {
             <div className="flex items-center gap-4">
               <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="w-4 h-4" />
-                <span>전국</span>
+                <Select value="전국" onValueChange={() => {}}>
+                  <SelectTrigger className="w-20 h-8 text-sm border-none shadow-none">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="전국">전국</SelectItem>
+                    <SelectItem value="서울">서울</SelectItem>
+                    <SelectItem value="부산">부산</SelectItem>
+                    <SelectItem value="광주">광주</SelectItem>
+                    <SelectItem value="대구">대구</SelectItem>
+                    <SelectItem value="대전">대전</SelectItem>
+                    <SelectItem value="인천">인천</SelectItem>
+                    <SelectItem value="울산">울산</SelectItem>
+                    <SelectItem value="세종">세종</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               {isAuthenticated ? (
                 <>
@@ -176,7 +192,7 @@ const Index = () => {
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <div className="bg-card rounded-lg p-6 text-center shadow-card">
-            <div className="text-3xl font-bold text-primary mb-2">{restaurants.length}</div>
+            <div className="text-3xl font-bold text-primary mb-2">{pagination.totalElements || restaurants.length}</div>
             <div className="text-muted-foreground">등록된 라멘집</div>
           </div>
           <div className="bg-card rounded-lg p-6 text-center shadow-card">
@@ -242,15 +258,24 @@ const Index = () => {
             </div>
             
             {/* 페이징 버튼 */}
-            {pagination.hasNext && (
-              <div className="text-center mt-8">
-                <Button 
-                  onClick={loadMoreRestaurants}
-                  variant="outline"
-                  disabled={loading}
-                >
-                  {loading ? "로딩 중..." : "더 보기"}
-                </Button>
+            {pagination.totalPages > 1 && (
+              <div className="flex justify-center mt-8">
+                <div className="flex gap-2">
+                  {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((pageNum) => (
+                    <Button
+                      key={pageNum}
+                      variant={pagination.currentPage + 1 === pageNum ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        const backendPage = pageNum - 1; // 백엔드는 0부터 시작
+                        goToPage(backendPage);
+                      }}
+                      disabled={loading}
+                    >
+                      {pageNum}
+                    </Button>
+                  ))}
+                </div>
               </div>
             )}
           </>

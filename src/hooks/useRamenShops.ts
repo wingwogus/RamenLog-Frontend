@@ -46,6 +46,10 @@ export const useRestaurants = (keyword?: string) => {
     setLoading(false);
   }, []);
 
+  const goToPage = useCallback((page: number) => {
+    fetchRestaurants(undefined, page);
+  }, [fetchRestaurants]);
+
   const searchRestaurants = useCallback((searchKeyword: string, district?: string) => {
     fetchRestaurants(searchKeyword, 0, district);
   }, [fetchRestaurants]);
@@ -79,6 +83,7 @@ export const useRestaurants = (keyword?: string) => {
     refreshRestaurants: () => fetchRestaurants(keyword),
     filterAndSortRestaurants,
     loadMoreRestaurants,
+    goToPage,
   };
 };
 

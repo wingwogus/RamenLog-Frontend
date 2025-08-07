@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { Restaurant, apiService } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import defaultRamenImage from "@/assets/default-ramen.jpg";
+import defaultRamenImage from "@/assets/ramen-logo.png";
 
 interface RamenShopCardProps {
   restaurant: Restaurant;
@@ -80,8 +80,7 @@ const RamenShopCard = ({ restaurant, onRate, onLikeToggle }: RamenShopCardProps)
               className="backdrop-blur-sm bg-white/90 hover:bg-white p-1 h-auto min-w-fit group relative"
               title={isLiked ? "찜 취소하기" : "찜하기"}
             >
-              <Heart className={`w-4 h-4 mr-1 ${isLiked ? "fill-red-500 text-red-500" : "text-gray-600"}`} />
-              <span className="text-xs">{isLiked ? "" : "찜하기"}</span>
+              <Heart className={`w-4 h-4 ${isLiked ? "fill-red-500 text-red-500" : "text-gray-600"}`} />
             </Button>
           </div>
         </div>
