@@ -5,6 +5,7 @@ export const useRestaurants = (keyword?: string) => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [allRestaurants, setAllRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
     currentPage: 0,
@@ -12,63 +13,108 @@ export const useRestaurants = (keyword?: string) => {
     totalElements: 0,
     hasNext: false
   });
+  const [currentFilters, setCurrentFilters] = useState<{
+    keyword?: string;
+    district?: string;
+    city?: string;
+  }>({});
 
-  const fetchRestaurants = useCallback(async (searchKeyword?: string, page = 0, district?: string) => {
-    setLoading(true);
+  const fetchRestaurants = useCallback(async (searchKeyword?: string, page = 0, district?: string, city?: string, isLoadMore = false) => {
+    if (isLoadMore) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
     setError(null);
 
-    const response = await apiService.getRestaurants(searchKeyword, page, 10, district);
+    // 도시 필터가 있으면 district에 포함
+    let finalDistrict = district;
+    if (city && !district) {
+      finalDistrict = city;
+    }
+
+    const response = await apiService.getRestaurants(searchKeyword, page, 10, finalDistrict);
 
     if (response.success) {
-      setRestaurants(response.data.content);
-      setAllRestaurants(response.data.content);
+      if (isLoadMore) {
+        // 무한 스크롤 시 기존 데이터에 추가
+        setRestaurants(prev => [...prev, ...response.data.content]);
+        setAllRestaurants(prev => [...prev, ...response.data.content]);
+      } else {
+        // 새로운 검색/필터 시 데이터 교체
+        setRestaurants(response.data.content);
+        setAllRestaurants(response.data.content);
+      }
       setPagination({
         currentPage: response.data.number,
         totalPages: response.data.totalPages,
         totalElements: response.data.totalElements,
         hasNext: !response.data.last
       });
+      
+      // 현재 필터 상태 저장
+      setCurrentFilters({
+        keyword: searchKeyword,
+        district: finalDistrict,
+        city
+      });
     } else {
       setError(response.error || '라멘집 데이터를 불러오는데 실패했습니다.');
-      // 백엔드 연결 실패시 샘플 데이터 사용
-      console.warn('API 연결 실패, 샘플 데이터 사용');
-      const sampleData = getSampleData();
-      setRestaurants(sampleData);
-      setAllRestaurants(sampleData);
-      setPagination({
-        currentPage: 0,
-        totalPages: 1,
-        totalElements: sampleData.length,
-        hasNext: false
-      });
+      if (!isLoadMore) {
+        // 백엔드 연결 실패시 샘플 데이터 사용 (초기 로드시만)
+        console.warn('API 연결 실패, 샘플 데이터 사용');
+        const sampleData = getSampleData();
+        setRestaurants(sampleData);
+        setAllRestaurants(sampleData);
+        setPagination({
+          currentPage: 0,
+          totalPages: 1,
+          totalElements: sampleData.length,
+          hasNext: false
+        });
+      }
     }
 
-    setLoading(false);
+    if (isLoadMore) {
+      setLoadingMore(false);
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const goToPage = useCallback((page: number) => {
     fetchRestaurants(undefined, page);
   }, [fetchRestaurants]);
 
-  const searchRestaurants = useCallback((searchKeyword: string, district?: string) => {
-    fetchRestaurants(searchKeyword, 0, district);
+  const searchRestaurants = useCallback((searchKeyword: string, district?: string, city?: string) => {
+    fetchRestaurants(searchKeyword, 0, district, city, false);
   }, [fetchRestaurants]);
 
   const filterAndSortRestaurants = useCallback((filters: any) => {
     try {
       // 필터링은 백엔드에서 처리하므로 API 호출
-      fetchRestaurants(undefined, 0, filters.district);
+      fetchRestaurants(currentFilters.keyword, 0, filters.district, filters.city, false);
     } catch (error) {
       console.error('Filter and sort error:', error);
       setError('필터링 중 오류가 발생했습니다.');
     }
-  }, [fetchRestaurants]);
+  }, [fetchRestaurants, currentFilters.keyword]);
 
   const loadMoreRestaurants = useCallback(() => {
-    if (pagination.hasNext) {
-      fetchRestaurants(undefined, pagination.currentPage + 1);
+    if (pagination.hasNext && !loadingMore) {
+      fetchRestaurants(
+        currentFilters.keyword, 
+        pagination.currentPage + 1, 
+        currentFilters.district, 
+        currentFilters.city, 
+        true
+      );
     }
-  }, [fetchRestaurants, pagination]);
+  }, [fetchRestaurants, pagination, loadingMore, currentFilters]);
+
+  const filterByCity = useCallback((city: string) => {
+    fetchRestaurants(currentFilters.keyword, 0, undefined, city, false);
+  }, [fetchRestaurants, currentFilters.keyword]);
 
   useEffect(() => {
     fetchRestaurants(keyword);
@@ -77,12 +123,14 @@ export const useRestaurants = (keyword?: string) => {
   return {
     restaurants,
     loading,
+    loadingMore,
     error,
     pagination,
     searchRestaurants,
     refreshRestaurants: () => fetchRestaurants(keyword),
     filterAndSortRestaurants,
     loadMoreRestaurants,
+    filterByCity,
     goToPage,
   };
 };

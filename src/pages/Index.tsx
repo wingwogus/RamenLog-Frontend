@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,10 +24,37 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const { restaurants, loading, error, pagination, searchRestaurants, refreshRestaurants, filterAndSortRestaurants, loadMoreRestaurants, goToPage } = useRestaurants();
+  const [selectedCity, setSelectedCity] = useState("전국");
+  const { restaurants, loading, loadingMore, error, pagination, searchRestaurants, refreshRestaurants, filterAndSortRestaurants, loadMoreRestaurants, filterByCity } = useRestaurants();
   const { submitReview, loading: ratingLoading } = useReview();
   const { toast } = useToast();
   const { user, isAuthenticated, logout } = useAuth();
+
+  // 무한 스크롤 감지
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 1000) {
+        if (!loading && !loadingMore && pagination.hasNext) {
+          loadMoreRestaurants();
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [loading, loadingMore, pagination.hasNext, loadMoreRestaurants]);
+
+  // 도시 선택 처리
+  const handleCityChange = useCallback((city: string) => {
+    setSelectedCity(city);
+    if (city === "전국") {
+      // 전국 선택시 도시 필터 해제
+      searchRestaurants(searchKeyword, undefined, undefined);
+    } else {
+      // 특정 도시 선택시 해당 도시로 필터링
+      filterByCity(city);
+    }
+  }, [searchKeyword, searchRestaurants, filterByCity]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -110,7 +137,7 @@ const Index = () => {
             <div className="flex items-center gap-4">
               <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="w-4 h-4" />
-                <Select value="전국" onValueChange={() => {}}>
+                <Select value={selectedCity} onValueChange={handleCityChange}>
                   <SelectTrigger className="w-20 h-8 text-sm border-none shadow-none">
                     <SelectValue />
                   </SelectTrigger>
@@ -257,25 +284,20 @@ const Index = () => {
               ))}
             </div>
             
-            {/* 페이징 버튼 */}
-            {pagination.totalPages > 1 && (
+            {/* 로딩 더 많은 데이터 표시 */}
+            {loadingMore && (
               <div className="flex justify-center mt-8">
-                <div className="flex gap-2">
-                  {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((pageNum) => (
-                    <Button
-                      key={pageNum}
-                      variant={pagination.currentPage + 1 === pageNum ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => {
-                        const backendPage = pageNum - 1; // 백엔드는 0부터 시작
-                        goToPage(backendPage);
-                      }}
-                      disabled={loading}
-                    >
-                      {pageNum}
-                    </Button>
-                  ))}
+                <div className="text-center">
+                  <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" />
+                  <p className="text-sm text-muted-foreground">더 많은 라멘집을 불러오고 있습니다...</p>
                 </div>
+              </div>
+            )}
+
+            {/* 더 이상 로드할 데이터가 없을 때 */}
+            {!pagination.hasNext && restaurants.length > 0 && (
+              <div className="text-center mt-8 py-4">
+                <p className="text-sm text-muted-foreground">모든 라멘집을 불러왔습니다!</p>
               </div>
             )}
           </>
