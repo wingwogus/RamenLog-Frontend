@@ -13,4 +13,4 @@ RUN npm run build
 
 # 2단계: 정적 파일을 serve로 제공
 RUN npm install -g serve
-CMD ["serve", "-s", "dist", "-l", "3001"]
+CMD ["serve", "-s", "dist", "-l", "3000"]
