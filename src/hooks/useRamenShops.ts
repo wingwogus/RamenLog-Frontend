@@ -1,21 +1,33 @@
 import { useState, useEffect, useCallback } from 'react';
-import { apiService, Restaurant, SearchFilters } from '@/services/api';
+import { apiService, Restaurant, SearchFilters, PaginatedResponse } from '@/services/api';
 
 export const useRestaurants = (keyword?: string) => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [allRestaurants, setAllRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({
+    currentPage: 0,
+    totalPages: 0,
+    totalElements: 0,
+    hasNext: false
+  });
 
-  const fetchRestaurants = useCallback(async (searchKeyword?: string) => {
+  const fetchRestaurants = useCallback(async (searchKeyword?: string, page = 0, district?: string) => {
     setLoading(true);
     setError(null);
 
-    const response = await apiService.getRestaurants(searchKeyword);
+    const response = await apiService.getRestaurants(searchKeyword, page, 10, district);
 
     if (response.success) {
-      setRestaurants(response.data);
-      setAllRestaurants(response.data);
+      setRestaurants(response.data.content);
+      setAllRestaurants(response.data.content);
+      setPagination({
+        currentPage: response.data.number,
+        totalPages: response.data.totalPages,
+        totalElements: response.data.totalElements,
+        hasNext: !response.data.last
+      });
     } else {
       setError(response.error || '라멘집 데이터를 불러오는데 실패했습니다.');
       // 백엔드 연결 실패시 샘플 데이터 사용
@@ -23,42 +35,36 @@ export const useRestaurants = (keyword?: string) => {
       const sampleData = getSampleData();
       setRestaurants(sampleData);
       setAllRestaurants(sampleData);
+      setPagination({
+        currentPage: 0,
+        totalPages: 1,
+        totalElements: sampleData.length,
+        hasNext: false
+      });
     }
 
     setLoading(false);
   }, []);
 
-  const searchRestaurants = useCallback((searchKeyword: string) => {
-    fetchRestaurants(searchKeyword);
+  const searchRestaurants = useCallback((searchKeyword: string, district?: string) => {
+    fetchRestaurants(searchKeyword, 0, district);
   }, [fetchRestaurants]);
 
   const filterAndSortRestaurants = useCallback((filters: any) => {
     try {
-      let filtered = [...allRestaurants];
-
-      // Filter by district (주소별 필터링)
-      if (filters.district && filters.district !== "전체") {
-        filtered = filtered.filter(restaurant => 
-          restaurant.address.fullAddress.includes(filters.district)
-        );
-      }
-
-      // Filter by rating
-      if (filters.rating && filters.rating > 0) {
-        filtered = filtered.filter(restaurant => restaurant.avgRating >= filters.rating);
-      }
-
-      // Sort
-      if (filters.sortBy === 'rating') {
-        filtered.sort((a, b) => b.avgRating - a.avgRating);
-      }
-
-      setRestaurants(filtered);
+      // 필터링은 백엔드에서 처리하므로 API 호출
+      fetchRestaurants(undefined, 0, filters.district);
     } catch (error) {
       console.error('Filter and sort error:', error);
       setError('필터링 중 오류가 발생했습니다.');
     }
-  }, [allRestaurants]);
+  }, [fetchRestaurants]);
+
+  const loadMoreRestaurants = useCallback(() => {
+    if (pagination.hasNext) {
+      fetchRestaurants(undefined, pagination.currentPage + 1);
+    }
+  }, [fetchRestaurants, pagination]);
 
   useEffect(() => {
     fetchRestaurants(keyword);
@@ -68,9 +74,11 @@ export const useRestaurants = (keyword?: string) => {
     restaurants,
     loading,
     error,
+    pagination,
     searchRestaurants,
     refreshRestaurants: () => fetchRestaurants(keyword),
     filterAndSortRestaurants,
+    loadMoreRestaurants,
   };
 };
 

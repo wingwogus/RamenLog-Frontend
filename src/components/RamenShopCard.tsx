@@ -77,10 +77,11 @@ const RamenShopCard = ({ restaurant, onRate, onLikeToggle }: RamenShopCardProps)
               variant="ghost"
               onClick={handleLikeToggle}
               disabled={isLiking}
-              className="backdrop-blur-sm bg-white/90 hover:bg-white p-1 h-auto min-w-fit"
+              className="backdrop-blur-sm bg-white/90 hover:bg-white p-1 h-auto min-w-fit group relative"
+              title={isLiked ? "찜 취소하기" : "찜하기"}
             >
               <Heart className={`w-4 h-4 mr-1 ${isLiked ? "fill-red-500 text-red-500" : "text-gray-600"}`} />
-              <span className="text-xs">{isLiked ? "찜함" : "찜하기"}</span>
+              <span className="text-xs">{isLiked ? "" : "찜하기"}</span>
             </Button>
           </div>
         </div>

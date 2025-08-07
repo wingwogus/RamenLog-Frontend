@@ -23,7 +23,7 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const { restaurants, loading, error, searchRestaurants, refreshRestaurants, filterAndSortRestaurants } = useRestaurants();
+  const { restaurants, loading, error, pagination, searchRestaurants, refreshRestaurants, filterAndSortRestaurants, loadMoreRestaurants } = useRestaurants();
   const { submitReview, loading: ratingLoading } = useReview();
   const { toast } = useToast();
   const { user, isAuthenticated, logout } = useAuth();
@@ -109,7 +109,7 @@ const Index = () => {
             <div className="flex items-center gap-4">
               <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="w-4 h-4" />
-                <span>서울</span>
+                <span>전국</span>
               </div>
               {isAuthenticated ? (
                 <>
@@ -153,8 +153,8 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        {/* Error Alert */}
-        {error && (
+        {/* Error Alert - 에러일 때만 표시 */}
+        {error && restaurants.length === 0 && (
           <Alert className="mb-6 border-destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
@@ -181,7 +181,7 @@ const Index = () => {
           </div>
           <div className="bg-card rounded-lg p-6 text-center shadow-card">
             <div className="text-3xl font-bold text-accent mb-2">
-              {1000 + restaurants.reduce((sum, restaurant) => sum + (restaurant.reviewCount || 0), 0)}
+              {1000 + (pagination.totalElements || restaurants.length)}
             </div>
             <div className="text-muted-foreground">총 리뷰 수</div>
           </div>
@@ -229,16 +229,31 @@ const Index = () => {
 
         {/* Shop Grid */}
         {restaurantsWithImages.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {restaurantsWithImages.map((restaurant) => (
-              <RamenShopCard 
-                key={restaurant.id} 
-                restaurant={restaurant} 
-                onRate={handleRating}
-                onLikeToggle={handleLikeToggle}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {restaurantsWithImages.map((restaurant) => (
+                <RamenShopCard 
+                  key={restaurant.id} 
+                  restaurant={restaurant} 
+                  onRate={handleRating}
+                  onLikeToggle={handleLikeToggle}
+                />
+              ))}
+            </div>
+            
+            {/* 페이징 버튼 */}
+            {pagination.hasNext && (
+              <div className="text-center mt-8">
+                <Button 
+                  onClick={loadMoreRestaurants}
+                  variant="outline"
+                  disabled={loading}
+                >
+                  {loading ? "로딩 중..." : "더 보기"}
+                </Button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
@@ -262,22 +277,24 @@ const Index = () => {
           </div>
         )}
 
-        {/* Backend Configuration Note */}
-        <div className="mt-16 p-6 bg-card rounded-lg border">
-          <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-accent" />
-            백엔드 연결 설정
-          </h3>
-          <p className="text-muted-foreground mb-4">
-            현재는 샘플 데이터를 사용하고 있습니다. 실제 백엔드와 연결하려면:
-          </p>
-          <div className="space-y-2 text-sm text-muted-foreground">
-            <p>1. <code className="bg-muted px-2 py-1 rounded">src/services/api.ts</code>에서 API_BASE_URL을 실제 백엔드 URL로 변경</p>
-            <p>2. 백엔드 서버가 실행 중인지 확인</p>
-            <p>3. CORS 설정이 올바른지 확인</p>
-            <p>4. API 엔드포인트가 예상 형식과 일치하는지 확인</p>
+        {/* Backend Configuration Note - 에러일 때만 표시 */}
+        {error && restaurants.length === 0 && (
+          <div className="mt-16 p-6 bg-card rounded-lg border">
+            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-accent" />
+              백엔드 연결 설정
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              현재는 샘플 데이터를 사용하고 있습니다. 실제 백엔드와 연결하려면:
+            </p>
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <p>1. <code className="bg-muted px-2 py-1 rounded">src/services/api.ts</code>에서 API_BASE_URL을 실제 백엔드 URL로 변경</p>
+              <p>2. 백엔드 서버가 실행 중인지 확인</p>
+              <p>3. CORS 설정이 올바른지 확인</p>
+              <p>4. API 엔드포인트가 예상 형식과 일치하는지 확인</p>
+            </div>
           </div>
-        </div>
+        )}
       </main>
 
       {/* Footer */}

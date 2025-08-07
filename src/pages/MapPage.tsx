@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiService, Restaurant } from '@/services/api';
+import { apiService, Restaurant, PaginatedResponse } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, MapPin, Star } from 'lucide-react';
@@ -27,7 +27,11 @@ const MapPage = () => {
       const response = await apiService.getRestaurants();
       
       if (response.success) {
-        setRestaurants(response.data);
+        if ('content' in response.data) {
+          setRestaurants((response.data as PaginatedResponse<Restaurant>).content);
+        } else {
+          setRestaurants(response.data as Restaurant[]);
+        }
       } else {
         setError('라멘집 데이터를 불러오는데 실패했습니다.');
       }

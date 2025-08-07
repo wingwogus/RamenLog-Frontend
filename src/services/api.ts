@@ -23,6 +23,30 @@ export interface Restaurant {
   reviewCount?: number;
 }
 
+export interface PaginatedResponse<T> {
+  content: T[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+    sort: {
+      empty: boolean;
+      unsorted: boolean;
+      sorted: boolean;
+    };
+    offset: number;
+    paged: boolean;
+    unpaged: boolean;
+  };
+  totalPages: number;
+  totalElements: number;
+  last: boolean;
+  size: number;
+  number: number;
+  numberOfElements: number;
+  first: boolean;
+  empty: boolean;
+}
+
 export interface Review {
   restaurantName: string;
   rating: number;
@@ -131,11 +155,15 @@ class ApiService {
   }
 
   // 라멘집 관련 API
-  async getRestaurants(keyword?: string): Promise<ApiResponse<Restaurant[]>> {
+  async getRestaurants(keyword?: string, page = 0, size = 10, district?: string): Promise<ApiResponse<PaginatedResponse<Restaurant>>> {
+    let endpoint = `/restaurants?page=${page}&size=${size}`;
     if (keyword) {
-      return this.makeRequest<Restaurant[]>(`/restaurants/search?keyword=${encodeURIComponent(keyword)}`);
+      endpoint += `&keyword=${encodeURIComponent(keyword)}`;
     }
-    return this.makeRequest<Restaurant[]>('/restaurants');
+    if (district) {
+      endpoint += `&district=${encodeURIComponent(district)}`;
+    }
+    return this.makeRequest<PaginatedResponse<Restaurant>>(endpoint);
   }
 
   async getRestaurant(id: number): Promise<ApiResponse<Restaurant>> {
