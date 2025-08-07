@@ -20,26 +20,51 @@ const MapPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchRestaurants = async () => {
+    const fetchAllRestaurants = async () => {
       setLoading(true);
       setError(null);
 
-      const response = await apiService.getRestaurants();
-      
-      if (response.success) {
-        if ('content' in response.data) {
-          setRestaurants((response.data as PaginatedResponse<Restaurant>).content);
-        } else {
-          setRestaurants(response.data as Restaurant[]);
+      try {
+        // 첫 번째 페이지를 가져와서 총 페이지 수 확인
+        const firstResponse = await apiService.getRestaurants(0, 10);
+        
+        if (!firstResponse.success) {
+          setError('라멘집 데이터를 불러오는데 실패했습니다.');
+          setLoading(false);
+          return;
         }
-      } else {
+
+        const firstPageData = firstResponse.data as PaginatedResponse<Restaurant>;
+        const totalPages = firstPageData.totalPages;
+        let allRestaurants = [...firstPageData.content];
+
+        // 나머지 페이지들을 병렬로 가져오기
+        if (totalPages > 1) {
+          const pagePromises = [];
+          for (let page = 1; page < totalPages; page++) {
+            pagePromises.push(apiService.getRestaurants(page, 10));
+          }
+
+          const pageResponses = await Promise.all(pagePromises);
+          
+          for (const response of pageResponses) {
+            if (response.success) {
+              const pageData = response.data as PaginatedResponse<Restaurant>;
+              allRestaurants = [...allRestaurants, ...pageData.content];
+            }
+          }
+        }
+
+        setRestaurants(allRestaurants);
+      } catch (error) {
+        console.error('Error fetching restaurants:', error);
         setError('라멘집 데이터를 불러오는데 실패했습니다.');
       }
 
       setLoading(false);
     };
 
-    fetchRestaurants();
+    fetchAllRestaurants();
   }, []);
 
   useEffect(() => {
