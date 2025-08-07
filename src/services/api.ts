@@ -1,5 +1,5 @@
 // API Base Configuration
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'https://ramenlog.kro.kr/api';
 
 export interface ApiResponse<T> {
   success: boolean;

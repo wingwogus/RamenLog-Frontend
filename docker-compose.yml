@@ -1,0 +1,13 @@
+services:
+  ramenlog-frontend:
+    build: .
+    container_name: ramenlog-frontend
+    expose:
+      - "3000"
+    networks:
+      - npm-net
+    restart: unless-stopped
+
+networks:
+  npm-net:
+    external: true
