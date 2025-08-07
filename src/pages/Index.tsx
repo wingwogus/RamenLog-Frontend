@@ -253,7 +253,7 @@ const Index = () => {
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-foreground">
-              검색 결과 <span className="text-primary">{restaurantsWithImages.length}개</span>
+              검색 결과 <span className="text-primary">{pagination.totalElements || restaurants.length}개</span>
             </h3>
             {searchQuery && (
               <Button
