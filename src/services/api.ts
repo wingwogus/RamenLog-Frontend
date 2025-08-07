@@ -155,15 +155,27 @@ class ApiService {
   }
 
   // 라멘집 관련 API
-  async getRestaurants(keyword?: string, page = 0, size = 10, district?: string): Promise<ApiResponse<PaginatedResponse<Restaurant>>> {
-    let endpoint = `/restaurants?page=${page}&size=${size}`;
+  async getRestaurants(keyword?: string, page = 0, size = 10): Promise<ApiResponse<PaginatedResponse<Restaurant>>> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      size: size.toString(),
+    });
+
     if (keyword) {
-      endpoint += `&keyword=${encodeURIComponent(keyword)}`;
+      params.append('keyword', keyword);
     }
-    if (district) {
-      endpoint += `&district=${encodeURIComponent(district)}`;
-    }
-    return this.makeRequest<PaginatedResponse<Restaurant>>(endpoint);
+
+    return this.makeRequest<PaginatedResponse<Restaurant>>(`/restaurants?${params.toString()}`);
+  }
+
+  async getRestaurantsByAddress(address: string, page = 0, size = 10): Promise<ApiResponse<PaginatedResponse<Restaurant>>> {
+    const params = new URLSearchParams({
+      address: address,
+      page: page.toString(),
+      size: size.toString(),
+    });
+
+    return this.makeRequest<PaginatedResponse<Restaurant>>(`/restaurants/by-address?${params.toString()}`);
   }
 
   async getRestaurant(id: number): Promise<ApiResponse<Restaurant>> {

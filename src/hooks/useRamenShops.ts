@@ -27,13 +27,14 @@ export const useRestaurants = (keyword?: string) => {
     }
     setError(null);
 
-    // 도시 필터가 있으면 district에 포함
-    let finalDistrict = district;
-    if (city && !district) {
-      finalDistrict = city;
+    // 지역 필터가 있으면 by-address 엔드포인트 사용
+    let response;
+    if (district || city) {
+      const address = district || city || '';
+      response = await apiService.getRestaurantsByAddress(address, page, 10);
+    } else {
+      response = await apiService.getRestaurants(searchKeyword, page, 10);
     }
-
-    const response = await apiService.getRestaurants(searchKeyword, page, 10, finalDistrict);
 
     if (response.success) {
       if (isLoadMore) {
@@ -55,7 +56,7 @@ export const useRestaurants = (keyword?: string) => {
       // 현재 필터 상태 저장
       setCurrentFilters({
         keyword: searchKeyword,
-        district: finalDistrict,
+        district: district,
         city
       });
     } else {
