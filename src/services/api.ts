@@ -155,15 +155,17 @@ class ApiService {
   }
 
   // 라멘집 관련 API
-  async getRestaurants(keyword?: string, page = 0, size = 10): Promise<ApiResponse<PaginatedResponse<Restaurant>>> {
+  // 키워드로 라멘집 검색 (페이지네이션 없음)
+  async searchRestaurants(keyword: string): Promise<ApiResponse<Restaurant[]>> {
+    return this.makeRequest<Restaurant[]>(`/restaurants/search?keyword=${encodeURIComponent(keyword)}`);
+  }
+
+  // 모든 라멘집 조회 (페이지네이션)
+  async getRestaurants(page = 0, size = 10): Promise<ApiResponse<PaginatedResponse<Restaurant>>> {
     const params = new URLSearchParams({
       page: page.toString(),
       size: size.toString(),
     });
-
-    if (keyword) {
-      params.append('keyword', keyword);
-    }
 
     return this.makeRequest<PaginatedResponse<Restaurant>>(`/restaurants?${params.toString()}`);
   }

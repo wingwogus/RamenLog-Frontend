@@ -244,8 +244,13 @@ const Index = () => {
           <SearchAndFilter
             onSearch={handleSearch}
             onFilter={handleFilter}
-            searchKeyword={searchKeyword}
-            setSearchKeyword={setSearchKeyword}
+            searchKeyword={searchQuery}
+            setSearchKeyword={setSearchQuery}
+            selectedDistrict={selectedCity !== "전국" ? selectedCity : "전체"}
+            onDistrictChange={(district) => {
+              setSelectedCity(district === "전체" ? "전국" : district);
+              handleFilter({ district: district === "전체" ? undefined : district });
+            }}
           />
         </div>
 

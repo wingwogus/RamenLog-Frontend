@@ -14,10 +14,22 @@ interface SearchAndFilterProps {
   onFilter: (filters: FilterOptions) => void;
   searchKeyword: string;
   setSearchKeyword: (keyword: string) => void;
+  selectedDistrict?: string;
+  onDistrictChange?: (district: string) => void;
 }
 
-const SearchAndFilter = ({ onSearch, onFilter, searchKeyword, setSearchKeyword }: SearchAndFilterProps) => {
-  const [selectedDistrict, setSelectedDistrict] = useState<string>("전체");
+const SearchAndFilter = ({ 
+  onSearch, 
+  onFilter, 
+  searchKeyword, 
+  setSearchKeyword, 
+  selectedDistrict: externalSelectedDistrict,
+  onDistrictChange: externalOnDistrictChange 
+}: SearchAndFilterProps) => {
+  const [internalSelectedDistrict, setInternalSelectedDistrict] = useState<string>("전체");
+  
+  // 외부에서 전달된 선택된 지역이 있으면 그것을 사용, 없으면 내부 상태 사용
+  const selectedDistrict = externalSelectedDistrict || internalSelectedDistrict;
 
   const districts = [
     "전체",
@@ -49,7 +61,11 @@ const SearchAndFilter = ({ onSearch, onFilter, searchKeyword, setSearchKeyword }
   ];
 
   const handleDistrictChange = (value: string) => {
-    setSelectedDistrict(value);
+    if (externalOnDistrictChange) {
+      externalOnDistrictChange(value);
+    } else {
+      setInternalSelectedDistrict(value);
+    }
     onFilter({ district: value === "전체" ? undefined : value });
   };
 

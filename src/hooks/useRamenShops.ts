@@ -27,13 +27,31 @@ export const useRestaurants = (keyword?: string) => {
     }
     setError(null);
 
-    // 지역 필터가 있으면 by-address 엔드포인트 사용
     let response;
-    if (district || city) {
+    
+    // 키워드 검색이 있는 경우 검색 엔드포인트 사용 (페이지네이션 없음)
+    if (searchKeyword && !district && !city) {
+      response = await apiService.searchRestaurants(searchKeyword);
+      // 검색 결과를 페이지네이션 형태로 변환
+      if (response.success) {
+        const searchData = {
+          content: response.data,
+          number: 0,
+          totalPages: 1,
+          totalElements: response.data.length,
+          last: true
+        };
+        response = { success: true, data: searchData };
+      }
+    }
+    // 지역 필터가 있으면 by-address 엔드포인트 사용
+    else if (district || city) {
       const address = district || city || '';
       response = await apiService.getRestaurantsByAddress(address, page, 10);
-    } else {
-      response = await apiService.getRestaurants(searchKeyword, page, 10);
+    } 
+    // 기본 전체 조회
+    else {
+      response = await apiService.getRestaurants(page, 10);
     }
 
     if (response.success) {
