@@ -185,7 +185,7 @@ export const useReview = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const submitReview = useCallback(async (restaurantId: number, score: number, content: string) => {
+const submitReview = useCallback(async (restaurantId: number, score: number, content: string, images?: File[]) => {
     setLoading(true);
     setError(null);
 
@@ -193,7 +193,7 @@ export const useReview = () => {
       restaurantId,
       rating: score,
       content,
-    });
+    }, images);
 
     if (!response.success) {
       setError(response.error || '리뷰 등록에 실패했습니다.');

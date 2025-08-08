@@ -92,7 +92,7 @@ const RamenShopCard = ({ restaurant, onRate, onLikeToggle }: RamenShopCardProps)
           </h3>
           <div className="flex items-center gap-1 text-sm">
             <Star className="w-4 h-4 fill-accent text-accent" />
-            <span className="font-medium">{restaurant.avgRating.toFixed(1)}</span>
+            <span className="font-medium">{(restaurant.avgRating ?? 0).toFixed(1)}</span>
           </div>
         </div>
       </CardHeader>

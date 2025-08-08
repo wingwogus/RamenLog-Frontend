@@ -121,7 +121,7 @@ const MapPage = () => {
               <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold;">${restaurant.name}</h3>
               <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 4px;">
                 <span style="color: #fbbf24;">★</span>
-                <span style="font-size: 14px;">${restaurant.avgRating.toFixed(1)}</span>
+                <span style="font-size: 14px;">${(restaurant.avgRating ?? 0).toFixed(1)}</span>
               </div>
               <p style="margin: 4px 0; font-size: 12px; color: #666;">${restaurant.address.fullAddress}</p>
               <button 

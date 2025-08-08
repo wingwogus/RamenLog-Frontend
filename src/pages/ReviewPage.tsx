@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Star, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useReview } from '@/hooks/useRamenShops';
@@ -16,6 +17,56 @@ export default function ReviewPage() {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [content, setContent] = useState('');
+  const [images, setImages] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+
+  const onFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    const next = [...images, ...files].slice(0, 3);
+    setImages(next);
+    setPreviews(next.map((f) => URL.createObjectURL(f)));
+  };
+
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+    setPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const convertToJpeg = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      if (file.type === 'image/jpeg' || file.type === 'image/jpg') {
+        resolve(file);
+        return;
+      }
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(file);
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const converted = new File([blob], file.name.replace(/\.[^/.]+$/, '.jpg'), { type: 'image/jpeg' });
+            resolve(converted);
+          } else {
+            resolve(file);
+          }
+          URL.revokeObjectURL(url);
+        }, 'image/jpeg', 0.9);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(file);
+      };
+      img.src = url;
+    });
+  };
 
   const handleSubmit = async () => {
     if (!id || rating === 0) {
@@ -36,7 +87,8 @@ export default function ReviewPage() {
       return;
     }
 
-    const success = await submitReview(parseInt(id), rating, content);
+    const processedImages = await Promise.all(images.map(convertToJpeg));
+    const success = await submitReview(parseInt(id), rating, content, processedImages);
     
     if (success) {
       toast({
@@ -123,6 +175,37 @@ export default function ReviewPage() {
               <p className="text-xs text-muted-foreground">
                 {content.length}/500자
               </p>
+            </div>
+
+            {/* 이미지 업로드 */}
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">리뷰 이미지 (최대 3장, 자동 JPG 변환)</h3>
+              <Input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={onFilesSelected}
+                aria-label="리뷰 이미지 업로드"
+              />
+              {previews.length > 0 && (
+                <div className="flex gap-3">
+                  {previews.map((src, idx) => (
+                    <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden">
+                      <img src={src} alt={`업로드 이미지 ${idx + 1}`} className="w-full h-full object-cover" />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="xs"
+                        className="absolute top-1 right-1 h-6 w-6 p-0"
+                        onClick={() => removeImage(idx)}
+                        aria-label={`이미지 ${idx + 1} 제거`}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* 제출 버튼 */}

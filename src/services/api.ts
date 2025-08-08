@@ -14,14 +14,18 @@ export interface Restaurant {
   address: {
     fullAddress: string;
   };
-  score: number;
-  avgRating: number;
+  score?: number | null;
+  avgRating?: number | null;
   imageUrl: string;
   latitude: number;
   longitude: number;
   liked?: boolean;
   reviewCount?: number;
+  phoneNumber?: string | null;
+  openNow?: boolean | null;
+  weekdayText?: string[] | null;
 }
+
 
 export interface PaginatedResponse<T> {
   content: T[];
@@ -49,12 +53,13 @@ export interface PaginatedResponse<T> {
 
 export interface Review {
   restaurantName: string;
-  rating: number;
+  rating?: number | null;
   content: string;
   nickname: string;
-  createdAt: string;
-  images: string[];
+  createdAt?: string;
+  images?: string[];
 }
+
 
 export interface CreateReviewRequest {
   restaurantId: number;
@@ -115,13 +120,17 @@ class ApiService {
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
     
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      ...(options.headers as Record<string, string>),
-    };
-    if (this.authToken) {
-      headers['Authorization'] = `Bearer ${this.authToken}`;
-    }
+const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+const headers: Record<string, string> = {
+  ...(options.headers as Record<string, string>),
+};
+if (!isFormData && !headers['Content-Type']) {
+  headers['Content-Type'] = 'application/json';
+}
+if (this.authToken) {
+  headers['Authorization'] = `Bearer ${this.authToken}`;
+}
+
 
     try {
       const response = await fetch(url, {
@@ -192,13 +201,23 @@ class ApiService {
     return this.makeRequest<Restaurant[]>('/restaurants/rank');
   }
 
-  // 리뷰 관련 API
-  async createReview(review: CreateReviewRequest): Promise<ApiResponse<string>> {
+// 리뷰 관련 API
+  async createReview(review: CreateReviewRequest, images?: File[]): Promise<ApiResponse<string>> {
+    if (images && images.length > 0) {
+      const formData = new FormData();
+      formData.append('dto', new Blob([JSON.stringify(review)], { type: 'application/json' }));
+      images.slice(0, 3).forEach((file) => formData.append('images', file));
+      return this.makeRequest<string>('/reviews', {
+        method: 'POST',
+        body: formData,
+      });
+    }
     return this.makeRequest<string>('/reviews', {
       method: 'POST',
       body: JSON.stringify(review),
     });
   }
+
 
   async getReviews(): Promise<ApiResponse<Review[]>> {
     return this.makeRequest<Review[]>('/reviews');

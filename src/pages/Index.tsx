@@ -232,7 +232,7 @@ const Index = () => {
             <div className="flex items-center justify-center gap-1 mb-2">
               <Star className="w-6 h-6 fill-accent text-accent" />
               <div className="text-3xl font-bold text-accent">
-                {restaurants.length > 0 ? (restaurants.reduce((sum, restaurant) => sum + restaurant.avgRating, 0) / restaurants.length).toFixed(1) : "0.0"}
+                {restaurants.length > 0 ? (restaurants.reduce((sum, restaurant) => sum + (restaurant.avgRating ?? 0), 0) / restaurants.length).toFixed(1) : "0.0"}
               </div>
             </div>
             <div className="text-muted-foreground">평균 평점</div>

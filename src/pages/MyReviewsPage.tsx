@@ -114,9 +114,9 @@ const MyReviewsPage = () => {
                             {review.restaurantName}
                           </span>
                           <div className="flex items-center gap-1">
-                            {renderStars(review.rating)}
+                            {renderStars(review.rating ?? 0)}
                             <span className="text-sm text-muted-foreground ml-1">
-                              {review.rating.toFixed(1)}
+                              {(review.rating ?? 0).toFixed(1)}
                             </span>
                           </div>
                           <span className="text-sm text-muted-foreground">
