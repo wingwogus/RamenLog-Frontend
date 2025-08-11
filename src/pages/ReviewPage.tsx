@@ -195,7 +195,7 @@ export default function ReviewPage() {
                       <Button
                         type="button"
                         variant="destructive"
-                        size="xs"
+                        size="icon"
                         className="absolute top-1 right-1 h-6 w-6 p-0"
                         onClick={() => removeImage(idx)}
                         aria-label={`이미지 ${idx + 1} 제거`}
