@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Star, MapPin, Heart, MessageSquare, Phone, Clock } from 'lucide-react';
+import { ArrowLeft, Star, MapPin, Heart, MessageSquare, Phone, Clock, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
@@ -21,10 +21,40 @@ const RestaurantDetailPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
 
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [activeImage, setActiveImage] = useState<string | null>(null);
+
+  const openPreview = (src: string) => {
+    setActiveImage(src);
+    setIsPreviewOpen(true);
+  };
+  const closePreview = () => {
+    setIsPreviewOpen(false);
+    setActiveImage(null);
+  };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closePreview();
+    };
+
+    if (isPreviewOpen) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', onKey);
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [isPreviewOpen]);
+
   useEffect(() => {
     const fetchData = async () => {
       if (!id) return;
-      
+
       setLoading(true);
       setError(null);
 
@@ -65,7 +95,7 @@ const RestaurantDetailPage = () => {
     // Optimistic update - toggle immediately on frontend
     const newLikedState = !isLiked;
     setIsLiked(newLikedState);
-    
+
     setIsLiking(true);
     try {
       await apiService.toggleLike(restaurant.id);
@@ -139,8 +169,8 @@ const RestaurantDetailPage = () => {
         {/* Restaurant Info */}
         <Card>
           <div className="relative h-64 overflow-hidden rounded-t-lg">
-            <img 
-              src={restaurant.imageUrl} 
+            <img
+              src={restaurant.imageUrl}
               alt={restaurant.name}
               className="w-full h-full object-cover"
             />
@@ -207,7 +237,7 @@ const RestaurantDetailPage = () => {
               </div>
 
               <div className="flex gap-3 pt-4">
-                <Button 
+                <Button
                   className="flex-1"
                   onClick={() => navigate(`/review/${restaurant.id}`)}
                 >
@@ -242,7 +272,7 @@ const RestaurantDetailPage = () => {
                           {review.nickname.slice(0, 2)}
                         </AvatarFallback>
                       </Avatar>
-                      
+
                       <div className="flex-1 space-y-2">
                         <div className="flex items-center gap-2">
                           <span className="font-medium">{review.nickname}</span>
@@ -256,7 +286,7 @@ const RestaurantDetailPage = () => {
                             {review.createdAt ? formatDate(review.createdAt) : ''}
                           </span>
                         </div>
-                        
+
                         <p className="text-foreground leading-relaxed">
                           {review.content}
                         </p>
@@ -264,18 +294,27 @@ const RestaurantDetailPage = () => {
                         {review.images && review.images.length > 0 && (
                           <div className="flex gap-2 mt-3">
                             {review.images.map((image, imgIndex) => (
-                              <img
+                              <div
                                 key={imgIndex}
-                                src={image}
-                                alt={`리뷰 이미지 ${imgIndex + 1}`}
-                                className="w-20 h-20 object-cover rounded-lg"
-                              />
+                                className="w-20 h-20 rounded-lg overflow-hidden cursor-zoom-in group"
+                                role="button"
+                                tabIndex={0}
+                                aria-label={`리뷰 이미지 ${imgIndex + 1} 확대`}
+                                onClick={() => openPreview(image)}
+                                onKeyDown={(e) => { if (e.key === 'Enter') openPreview(image); }}
+                              >
+                                <img
+                                  src={image}
+                                  alt={`리뷰 이미지 ${imgIndex + 1}`}
+                                  className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-110"
+                                />
+                              </div>
                             ))}
                           </div>
                         )}
                       </div>
                     </div>
-                    
+
                     {index < reviews.length - 1 && <Separator />}
                   </div>
                 ))}
@@ -284,6 +323,32 @@ const RestaurantDetailPage = () => {
           </CardContent>
         </Card>
       </div>
+      {isPreviewOpen && activeImage && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={closePreview}
+          aria-modal="true"
+          role="dialog"
+        >
+          <div className="relative max-w-[90vw] max-h-[80vh]" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={activeImage}
+              alt="확대 이미지"
+              className="max-w-[90vw] max-h-[80vh] rounded-lg shadow-2xl object-contain"
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              size="icon"
+              className="absolute -top-3 -right-3 rounded-full shadow"
+              onClick={closePreview}
+              aria-label="확대 닫기"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
