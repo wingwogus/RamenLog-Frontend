@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiService, Restaurant, Review } from '@/services/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Star, MapPin, Heart, MessageSquare, Phone, Clock, X } from 'lucide-react';
+import { ArrowLeft, Star, MapPin, Heart, MessageSquare, Phone, Clock, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
@@ -21,35 +21,53 @@ const RestaurantDetailPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
 
+  // --- 상태 관리 변경 ---
+  // 단일 이미지가 아닌, 이미지 목록과 현재 인덱스를 관리합니다.
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [activeImage, setActiveImage] = useState<string | null>(null);
+  const [activeImages, setActiveImages] = useState<string[]>([]);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-  const openPreview = (src: string) => {
-    setActiveImage(src);
+  const openPreview = (images: string[], startIndex: number) => {
+    setActiveImages(images);
+    setActiveImageIndex(startIndex);
     setIsPreviewOpen(true);
   };
-  const closePreview = () => {
+
+  const closePreview = useCallback(() => {
     setIsPreviewOpen(false);
-    setActiveImage(null);
-  };
+  }, []);
+
+  // --- 이미지 네비게이션 함수 ---
+  const goToNextImage = useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation(); // 버튼 클릭 시 모달이 닫히는 것을 방지
+    setActiveImageIndex((prevIndex) => (prevIndex + 1) % activeImages.length);
+  }, [activeImages.length]);
+
+  const goToPrevImage = useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation(); // 버튼 클릭 시 모달이 닫히는 것을 방지
+    setActiveImageIndex((prevIndex) => (prevIndex - 1 + activeImages.length) % activeImages.length);
+  }, [activeImages.length]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') closePreview();
+      // --- 키보드 좌우 화살표로 네비게이션 ---
+      if (activeImages.length > 1) {
+        if (e.key === 'ArrowRight') goToNextImage();
+        if (e.key === 'ArrowLeft') goToPrevImage();
+      }
     };
 
     if (isPreviewOpen) {
       document.body.style.overflow = 'hidden';
       window.addEventListener('keydown', onKey);
-    } else {
-      document.body.style.overflow = '';
     }
 
     return () => {
       document.body.style.overflow = '';
       window.removeEventListener('keydown', onKey);
     };
-  }, [isPreviewOpen]);
+  }, [isPreviewOpen, closePreview, goToNextImage, goToPrevImage, activeImages.length]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -300,8 +318,9 @@ const RestaurantDetailPage = () => {
                                 role="button"
                                 tabIndex={0}
                                 aria-label={`리뷰 이미지 ${imgIndex + 1} 확대`}
-                                onClick={() => openPreview(image)}
-                                onKeyDown={(e) => { if (e.key === 'Enter') openPreview(image); }}
+                                // --- 클릭 시 전체 이미지 목록과 현재 인덱스를 전달 ---
+                                onClick={() => openPreview(review.images, imgIndex)}
+                                onKeyDown={(e) => { if (e.key === 'Enter') openPreview(review.images, imgIndex); }}
                               >
                                 <img
                                   src={image}
@@ -323,30 +342,55 @@ const RestaurantDetailPage = () => {
           </CardContent>
         </Card>
       </div>
-      {isPreviewOpen && activeImage && (
+
+      {/* --- 이미지 뷰어 UI 변경 --- */}
+      {isPreviewOpen && activeImages.length > 0 && (
         <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={closePreview}
           aria-modal="true"
           role="dialog"
         >
-          <div className="relative max-w-[90vw] max-h-[80vh]" onClick={(e) => e.stopPropagation()}>
-            <img
-              src={activeImage}
-              alt="확대 이미지"
-              className="max-w-[90vw] max-h-[80vh] rounded-lg shadow-2xl object-contain"
-            />
+          {/* 이전 이미지 버튼 */}
+          {activeImages.length > 1 && (
             <Button
               type="button"
-              variant="secondary"
+              variant="ghost"
               size="icon"
-              className="absolute -top-3 -right-3 rounded-full shadow"
-              onClick={closePreview}
-              aria-label="확대 닫기"
+              className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full h-12 w-12 text-white/70 hover:text-white hover:bg-white/20"
+              onClick={goToPrevImage}
+              aria-label="이전 이미지"
             >
-              <X className="w-5 h-5" />
+              <ChevronLeft className="w-8 h-8" />
             </Button>
+          )}
+
+          <div className="relative" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={activeImages[activeImageIndex]}
+              alt="확대 이미지"
+              className="max-w-[90vw] max-h-[85vh] rounded-lg shadow-2xl object-contain"
+            />
           </div>
+
+          {/* 다음 이미지 버튼 */}
+          {activeImages.length > 1 && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full h-12 w-12 text-white/70 hover:text-white hover:bg-white/20"
+              onClick={goToNextImage}
+              aria-label="다음 이미지"
+            >
+              <ChevronRight className="w-8 h-8" />
+            </Button>
+          )}
+
+          {/* 닫기 버튼 (우측 상단) */}
+          <Button type="button" variant="ghost" size="icon" className="absolute top-4 right-4 rounded-full h-12 w-12 text-white/70 hover:text-white hover:bg-white/20" onClick={closePreview} aria-label="확대 닫기">
+            <X className="w-8 h-8" />
+          </Button>
         </div>
       )}
     </div>
